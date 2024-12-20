@@ -1,25 +1,36 @@
 use bevy::{prelude::*, ui::FocusPolicy};
 
 use super::despawn_screen;
-use crate::theme::color::Display;
 
-use crate::primitives::button::{
-    CustomButton, 
-    ButtonWidth, 
-    ButtonComponent, 
-    ButtonSize, 
-    InteractiveState, 
-    ButtonStyle, 
-    button_system,
-    primary_default,
+use crate::{
+    menu_plugin,
+    NavigateTo
 };
 
+use crate::theme::{
+    color::Display,
+    fonts::FontResources
+};
 
-use crate::menu_plugin;
+use crate::interface::{
+    header::{ header, Header },
+    bumper::Bumper,
+    interfaces::Interface
+};
 
-use crate::NavigateTo;
-use crate::theme::icons::Icon;
-use crate::theme::fonts::{FontResources, FontSizes, Style, setup_fonts};
+use crate::primitives::{
+    profile_photo::profile_photo,
+    button::{
+        button_system,
+        primary_default,
+    },
+};
+
+use crate::components::{
+    text_input::text_input,
+    navigator::sidebar_navigator,
+};
+
 
 use bevy_simple_text_input::{
     TextInput, 
@@ -29,89 +40,33 @@ use bevy_simple_text_input::{
     TextInputInactive,
 };
 
-// ==== Components ==== //
-
-use crate::components::{
-    balance_display::balance_display,
-    navigator::sidebar_navigator,
-    text_input::text_input,
-};
-
-
 #[derive(Component)]
 pub struct OnAddressScreen;
 
+
 pub fn address_setup(mut commands: Commands, asset_server: Res<AssetServer>, fonts: Res<FontResources>) {
+
+    let colors = Display::new();
+    let bumper = Bumper::new();
+    let interface = Interface::new();
+    
+    let next = primary_default("Continue", true, NavigateTo::Home);
+
     commands.spawn((
-        Node {
-            width: Val::Percent(100.0),
-            height: Val::Percent(100.0),
-            align_items: AlignItems::Start,
-            justify_content: JustifyContent::Start,
-            flex_direction: FlexDirection::Row,
-            ..default()
-        },
+        interface.node,
         OnAddressScreen,
     ))
     .with_children(|parent| {
         sidebar_navigator(parent, &fonts, &asset_server);
-        parent.spawn((
-            Node {
-                width: Val::Percent(100.0),
-                height: Val::Percent(100.0),
-                align_items: AlignItems::Center,
-                justify_content: JustifyContent::Center,
-                flex_direction: FlexDirection::Column,
-                ..default()
-            },
-            Interaction::None,
-        ))
-        .with_children(|parent| {
-            parent.spawn((Node {
-                height: Val::Percent(100.0),
-                width: Val::Percent(100.0),
-                max_width: Val::Px(512.0),
-                align_items: AlignItems::Center,
-                justify_content: JustifyContent::Start,
-                margin: UiRect {
-                    right: Val::Px(24.0),
-                    left: Val::Px(24.0),
-                    top: Val::Px(16.0),
-                    bottom: Val::Px(16.0),
-                }, 
-                ..default()
-            })).with_children(|parent| {
+
+        parent.spawn((interface.page_node, Interaction::None)).with_children(|parent| {
+            header(parent, &fonts, &asset_server, Header::Home, "Wallet");
+
+            parent.spawn(interface.content).with_children(|parent| {
                 text_input(parent, &fonts);
             });
 
-            parent.spawn((Node {
-                width: Val::Percent(100.0),
-                max_width: Val::Px(512.0),
-                align_items: AlignItems::Center,
-                justify_content: JustifyContent::Center,
-                ..default()
-            })).with_children(|parent| {
-    
-                let done = primary_default("Continue", true, NavigateTo::Home);
-    
-                parent.spawn(Node {
-                    width: Val::Percent(100.0),
-                    justify_content: JustifyContent::Center,
-                    align_items: AlignItems::Center,
-                    flex_direction: FlexDirection::Row,
-                    column_gap: Val::Px(16.0),
-                    padding: UiRect {
-                        top: Val::Px(16.0),
-                        bottom: Val::Px(16.0),
-                        left: Val::Px(24.0),
-                        right: Val::Px(24.0),
-                        ..default()
-                    },
-                    ..default()
-                }).with_children(|child| {
-                    ButtonComponent::spawn_button(child, &asset_server, &fonts, done);
-                });
-            });
+            bumper.button_bumper(parent, &fonts, &asset_server, vec![next]);
         });
     });
 }

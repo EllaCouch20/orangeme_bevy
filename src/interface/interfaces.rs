@@ -16,6 +16,7 @@ use crate::primitives::button::CustomButton;
 pub struct Interface {
     pub node: Node,
     pub page_node: Node,
+    pub content: Node,
     pub content_centered: Node,
 }
 
@@ -44,6 +45,14 @@ impl Interface {
                 align_items: AlignItems::Center,
                 justify_content: JustifyContent::Center,
                 flex_direction: FlexDirection::Column,
+                ..default()
+            },
+            content: Node {
+                width: EXPAND,
+                height: EXPAND,
+                max_width: Val::Px(512.0),
+                align_items: AlignItems::Start,
+                justify_content: JustifyContent::Start,
                 ..default()
             },
             content_centered: Node {
