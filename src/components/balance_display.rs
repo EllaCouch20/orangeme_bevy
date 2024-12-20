@@ -24,7 +24,7 @@ pub fn balance_display(
         justify_content: JustifyContent::Center,
         align_items: AlignItems::Center,
         flex_direction: FlexDirection::Column,
-        row_gap: Val::Px(32.0), 
+        row_gap: Val::Px(8.0), 
         ..default()
     })
     .with_children(|child| {
