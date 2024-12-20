@@ -2,10 +2,12 @@ use bevy::prelude::*;
 use crate::primitives::profile_photo::profile_photo;
 use std::sync::Arc;
 
+use crate::NavigateTo;
+
 use crate::theme::{
     color::Display,
     fonts::FontResources,
-    icons::Icon,
+    icons::{Icon, icon_button},
 };
 
 pub enum Header {
@@ -36,20 +38,19 @@ pub fn header(
         Header::Home => {
             parent.spawn((header_node)).with_children(|parent| { 
                 profile_photo(parent, &fonts, &asset_server, "profile_photo.png");
-                header_title("Wallet", fonts.size.h3, parent, &fonts);
+                header_title(title, fonts.size.h3, parent, &fonts);
                 header_icon(None, parent, &asset_server);
             });
         },
         Header::Stack => {
             parent.spawn((header_node)).with_children(|parent| { 
                 header_icon(Some(Icon::Left), parent, &asset_server);
-                header_title(title, fonts.size.h3, parent, &fonts);
+                header_title(title, fonts.size.h4, parent, &fonts);
                 header_icon(None, parent, &asset_server);
             });
         }
     }
 }
-
 
 pub fn header_title(
     title: &str, 
@@ -60,7 +61,7 @@ pub fn header_title(
     let colors = Display::new();
 
     parent.spawn((
-        Text::new("Wallet"),
+        Text::new(title),
         TextFont {
             font: fonts.style.heading.clone(),
             font_size,
@@ -71,18 +72,20 @@ pub fn header_title(
 }
 
 pub fn header_icon(
-    icon: Option<Icon>, 
+    icon: Option<Icon>,
     parent: &mut ChildBuilder,
     asset_server: &Res<AssetServer>,
 ){
     let colors = Display::new();
-
-    parent.spawn((
-        if let Some(icon) = icon { Icon::new(icon, asset_server); },
-        Node {
-            height: Val::Px(32.0),
-            width: Val::Px(32.0),
-            ..default()
-        },
-    ));
+    if let Some(icon) = icon { 
+        icon_button(parent, &asset_server, icon, NavigateTo::Home);
+    } else {
+        parent.spawn((
+            Node {
+                height: Val::Px(32.0),
+                width: Val::Px(32.0),
+                ..default()
+            },
+        ));
+    }
 }

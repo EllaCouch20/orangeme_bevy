@@ -67,44 +67,32 @@ pub fn text_input(
     let colors = Display::new();
 
     parent.spawn((
-            Node {
-                width: Val::Percent(100.0),
-                height: Val::Percent(100.0),
-                align_items: AlignItems::Center,
-                justify_content: JustifyContent::Center,
-                ..default()
-            },
-            Interaction::None,
-        ))
-        .with_children(|parent| {
-            parent.spawn((
-                Node {
-                    border: UiRect::all(Val::Px(1.0)),
-                    height: Val::Px(48.0),
-                    width: Val::Percent(100.0),
-                    align_items: AlignItems::Center,
-                    justify_content: JustifyContent::Start,
-                    padding: UiRect::all(Val::Px(16.0)), 
-                    ..default()
-                },
-                BorderColor(colors.outline_secondary),
-                BackgroundColor(colors.bg_primary),
-                BorderRadius::all(Val::Px(8.0)),
-                FocusPolicy::Block,
-                TextInput,
-                TextInputTextFont(TextFont {
-                    font,
-                    font_size,
-                    ..default()
-                }),
-                TextInputTextColor(TextColor(colors.text_primary)),
-                TextInputPlaceholder {
-                    value: "Bitcoin address...".to_string(),
-                    ..default()
-                },
-                TextInputInactive(true),
-            ));
-        });
+        Node {
+            border: UiRect::all(Val::Px(1.0)),
+            height: Val::Px(48.0),
+            width: Val::Percent(100.0),
+            align_items: AlignItems::Center,
+            justify_content: JustifyContent::Start,
+            padding: UiRect::all(Val::Px(16.0)), 
+            ..default()
+        },
+        BorderColor(colors.outline_secondary),
+        BackgroundColor(colors.bg_primary),
+        BorderRadius::all(Val::Px(8.0)),
+        FocusPolicy::Block,
+        TextInput,
+        TextInputTextFont(TextFont {
+            font,
+            font_size,
+            ..default()
+        }),
+        TextInputTextColor(TextColor(colors.text_primary)),
+        TextInputPlaceholder {
+            value: "Bitcoin address...".to_string(),
+            ..default()
+        },
+        TextInputInactive(true),
+    ));
 }
 
 pub fn focus(

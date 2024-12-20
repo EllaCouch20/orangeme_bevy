@@ -18,6 +18,7 @@ pub mod components {
     pub mod balance_display;
     pub mod navigator; 
     pub mod text_input;
+    pub mod tip_button;
 }
 
 pub mod interface {

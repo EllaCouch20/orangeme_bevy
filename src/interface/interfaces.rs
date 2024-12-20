@@ -51,8 +51,10 @@ impl Interface {
                 width: EXPAND,
                 height: EXPAND,
                 max_width: Val::Px(512.0),
-                align_items: AlignItems::Start,
+                align_items: AlignItems::Center,
                 justify_content: JustifyContent::Start,
+                flex_direction: FlexDirection::Column,
+                row_gap: Val::Px(24.0),
                 ..default()
             },
             content_centered: Node {

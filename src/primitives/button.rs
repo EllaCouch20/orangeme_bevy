@@ -1,7 +1,6 @@
 #![allow(unused)]
 
 use bevy::prelude::*;
-use bevy_ui::prelude::*;
 
 use crate::theme::{
     color::ButtonColor,
@@ -12,9 +11,6 @@ use crate::theme::{
 use crate::primitives::{
     profile_photo::profile_photo
 };
-
-use bevy::color::palettes::basic::*;
-use bevy::color::palettes::css::*;
 
 use crate::NavigateTo;
 
@@ -98,6 +94,7 @@ impl ButtonComponent {
         data: CustomButton,
     ) {
         let mut status = InteractiveState::Default;
+        
         if data.enabled {
             if data.state == InteractiveState::Selected {
                 status = InteractiveState::Selected;
@@ -230,8 +227,7 @@ pub fn button_system(
     }
 }
 
-
-pub fn primary_default(label: &str, enabled: bool, navigate_to: NavigateTo) -> CustomButton{
+pub fn primary_default(label: &str, enabled: bool, navigate_to: NavigateTo) -> CustomButton {
     return CustomButton::new(
         label,
         None,
@@ -243,6 +239,22 @@ pub fn primary_default(label: &str, enabled: bool, navigate_to: NavigateTo) -> C
         navigate_to,
         JustifyContent::Center,
         enabled,
+        false,
+    );
+}
+
+pub fn secondary_default(label: &str, icon: Icon, navigate_to: NavigateTo) -> CustomButton {
+    return CustomButton::new(
+        label,
+        Some(icon),
+        None,
+        ButtonStyle::Secondary,
+        ButtonWidth::Hug,
+        ButtonSize::Medium,
+        InteractiveState::Default,
+        navigate_to,
+        JustifyContent::Center,
+        true,
         false,
     );
 }

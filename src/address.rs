@@ -9,7 +9,8 @@ use crate::{
 
 use crate::theme::{
     color::Display,
-    fonts::FontResources
+    fonts::FontResources,
+    icons::Icon,
 };
 
 use crate::interface::{
@@ -21,14 +22,17 @@ use crate::interface::{
 use crate::primitives::{
     profile_photo::profile_photo,
     button::{
-        button_system,
+        ButtonComponent,
         primary_default,
+        secondary_default,
+        button_system,
     },
 };
 
 use crate::components::{
     text_input::text_input,
     navigator::sidebar_navigator,
+    tip_button::tip_buttons,
 };
 
 
@@ -50,7 +54,12 @@ pub fn address_setup(mut commands: Commands, asset_server: Res<AssetServer>, fon
     let bumper = Bumper::new();
     let interface = Interface::new();
     
+    let paste = secondary_default("Paste Clipboard", Icon::Paste, NavigateTo::Home);
+    let scan = secondary_default("Scan QR Code", Icon::Scan, NavigateTo::Home);
+    let contact = secondary_default("Select Contact", Icon::Profile, NavigateTo::Home);
+
     let next = primary_default("Continue", true, NavigateTo::Home);
+
 
     commands.spawn((
         interface.node,
@@ -60,12 +69,12 @@ pub fn address_setup(mut commands: Commands, asset_server: Res<AssetServer>, fon
         sidebar_navigator(parent, &fonts, &asset_server);
 
         parent.spawn((interface.page_node, Interaction::None)).with_children(|parent| {
-            header(parent, &fonts, &asset_server, Header::Home, "Wallet");
+            header(parent, &fonts, &asset_server, Header::Stack, "Send address");
 
-            parent.spawn(interface.content).with_children(|parent| {
+            parent.spawn(interface.content).with_children(|parent| { 
                 text_input(parent, &fonts);
+                tip_buttons(parent, &asset_server, &fonts, vec![paste, scan, contact]);
             });
-
             bumper.button_bumper(parent, &fonts, &asset_server, vec![next]);
         });
     });
