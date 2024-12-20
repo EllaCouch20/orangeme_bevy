@@ -47,24 +47,42 @@ impl Bumper {
     }
 
 
-    pub fn double_bumper(
+    pub fn button_bumper(
         self,
         parent: &mut ChildBuilder,
         fonts: &Res<FontResources>,
         asset_server: &Res<AssetServer>,
+        buttons: Vec<CustomButton>,
     ) {
         let colors = Display::new();
         parent.spawn((self.bumper_node)).with_children(|parent| {
-
-            let send = primary_default("Send", true, NavigateTo::Address);
-            let receive = primary_default("Receive", true, NavigateTo::BackToMainMenu);
-
             parent.spawn(self.bumper_content_node).with_children(|child| {
-                ButtonComponent::spawn_button(child, &asset_server, &fonts, receive);
-                ButtonComponent::spawn_button(child, &asset_server, &fonts, send);
+                for button in buttons {
+                    ButtonComponent::spawn_button(child, &asset_server, &fonts, button);
+                }
             });
         });
     }
 
 }
+
+// pub fn double_bumper(
+//     self,
+//     parent: &mut ChildBuilder,
+//     fonts: &Res<FontResources>,
+//     asset_server: &Res<AssetServer>,
+//     buttons: Vec<CustomButton>,
+// ) {
+//     let colors = Display::new();
+//     parent.spawn((self.bumper_node)).with_children(|parent| {
+
+//         let send = primary_default("Send", true, NavigateTo::Address);
+//         let receive = primary_default("Receive", true, NavigateTo::BackToMainMenu);
+
+//         parent.spawn(self.bumper_content_node).with_children(|child| {
+//             ButtonComponent::spawn_button(child, &asset_server, &fonts, receive);
+//             ButtonComponent::spawn_button(child, &asset_server, &fonts, send);
+//         });
+//     });
+// }
 

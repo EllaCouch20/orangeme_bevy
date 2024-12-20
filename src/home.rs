@@ -1,29 +1,30 @@
-use bevy::{app::AppExit, color::palettes::css::CRIMSON, prelude::*};
+use bevy::prelude::*;
 
 use super::despawn_screen;
-use bevy_ui::prelude::*;
 
-use crate::primitives::button::{
-    CustomButton, 
-    ButtonWidth, 
-    ButtonComponent, 
-    ButtonSize, 
-    InteractiveState, 
-    ButtonStyle, 
-    button_system,
-    primary_default,
+use crate::{
+    menu_plugin,
+    NavigateTo
 };
 
-use crate::menu_plugin;
+use crate::theme::{
+    color::Display,
+    fonts::FontResources
+};
 
-use crate::NavigateTo;
-use crate::theme::icons::Icon;
-use crate::theme::color::Display;
-use crate::theme::fonts::{FontResources, FontSizes, Style, setup_fonts};
-use crate::interface::header::{header, Header};
-use crate::primitives::profile_photo::profile_photo;
-use crate::interface::bumper::Bumper;
-use crate::interface::interfaces::Interface;
+use crate::interface::{
+    header::{ header, Header },
+    bumper::Bumper,
+    interfaces::Interface
+};
+
+use crate::primitives::{
+    profile_photo::profile_photo,
+    button::{
+        button_system,
+        primary_default,
+    },
+};
 
 use crate::components::{
     balance_display::balance_display,
@@ -40,6 +41,9 @@ pub fn home_setup(mut commands: Commands, asset_server: Res<AssetServer>, fonts:
     let bumper = Bumper::new();
     let interface = Interface::new();
     
+    let send = primary_default("Send", true, NavigateTo::Address);
+    let receive = primary_default("Receive", true, NavigateTo::Address);
+
     commands.spawn((
         interface.node,
         OnHomeScreen,
@@ -54,7 +58,7 @@ pub fn home_setup(mut commands: Commands, asset_server: Res<AssetServer>, fonts:
                 balance_display(parent, &fonts);
             });
 
-            bumper.double_bumper(parent, &fonts, &asset_server);
+            bumper.button_bumper(parent, &fonts, &asset_server, vec![receive, send]);
         });
     });
 }

@@ -92,7 +92,7 @@ pub fn address_setup(mut commands: Commands, asset_server: Res<AssetServer>, fon
                 ..default()
             })).with_children(|parent| {
     
-                let done = primary_default("Continue", true, NavigateTo::BackToMainMenu);
+                let done = primary_default("Continue", true, NavigateTo::Home);
     
                 parent.spawn(Node {
                     width: Val::Percent(100.0),
