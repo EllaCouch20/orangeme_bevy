@@ -9,7 +9,6 @@ use crate::theme::{
 };
 
 use crate::NavigateTo;
-use crate::primitives::button::primary_default;
 use crate::primitives::button::ButtonComponent;
 use crate::primitives::button::CustomButton;
 

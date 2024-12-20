@@ -7,6 +7,8 @@ use bevy_ui::prelude::*;
 pub fn balance_display(
     parent: &mut ChildBuilder,
     fonts: &Res<FontResources>,
+    usd: &str,
+    btc: &str,
 ){
     let usd_font = fonts.style.label.clone();
     let usd_font_size = fonts.size.title;
@@ -29,7 +31,7 @@ pub fn balance_display(
     })
     .with_children(|child| {
         child.spawn((
-            Text::new("$0.00"),
+            Text::new(usd),
             TextFont {
                 font: usd_font,
                 font_size: usd_font_size,
@@ -38,7 +40,7 @@ pub fn balance_display(
             TextColor(colors.text_heading),
         ));  
         child.spawn((
-            Text::new("0.00000000 BTC"),
+            Text::new(btc),
             TextFont {
                 font: btc_font,
                 font_size: btc_font_size,

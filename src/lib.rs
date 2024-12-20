@@ -2,10 +2,12 @@
 
 mod home;
 mod address;
+mod amount;
 
 pub mod primitives { 
     pub mod button; 
     pub mod profile_photo;
+    pub mod button_presets;
 }
 
 pub mod theme { 
@@ -36,10 +38,11 @@ use theme::{
 };
 
 use bevy_simple_text_input::{TextInputPlugin, TextInputSystem};
-use crate::primitives::button::button_system;
+use crate::primitives::button::{button_system, InteractiveState};
 
 use crate::home::{OnHomeScreen, home_setup};
 use crate::address::{OnAddressScreen, address_setup};
+use crate::amount::{OnAmountScreen, amount_setup};
 use crate::components::text_input::focus;
 
 #[derive(Clone, Copy, Default, Eq, PartialEq, Debug, Hash, States)]
@@ -77,15 +80,17 @@ fn despawn_screen<T: Component>(to_despawn: Query<Entity, With<T>>, mut commands
     }
 }
 
-#[derive(Component)]
+#[derive(Component, Clone, Copy)]
 pub enum NavigateTo {
     Home,
+    Amount,
     Address,
 }
 
 #[derive(Clone, Copy, Default, Eq, PartialEq, Debug, Hash, States)]
 pub enum PageState {
     Home,
+    Amount,
     Address,
     #[default]
     Disabled,
@@ -99,6 +104,8 @@ pub fn menu_plugin(app: &mut App) {
         .add_systems(OnExit(PageState::Home), despawn_screen::<OnHomeScreen>)
         .add_systems(OnEnter(PageState::Address), address_setup)
         .add_systems(OnExit(PageState::Address), despawn_screen::<OnAddressScreen>)
+        .add_systems(OnEnter(PageState::Amount), amount_setup)
+        .add_systems(OnExit(PageState::Amount), despawn_screen::<OnAmountScreen>)
         .add_systems(PreStartup, setup_fonts)
         .add_systems(Update, button_system)
         .add_systems(Update, (menu_action, button_system).run_if(in_state(GameState::Menu)));
@@ -121,7 +128,8 @@ pub fn menu_action(
         if *interaction == Interaction::Pressed {
             match menu_button_action {
                 NavigateTo::Home => menu_state.set(PageState::Home),
-                NavigateTo::Address => menu_state.set(PageState::Address)
+                NavigateTo::Address => menu_state.set(PageState::Address),
+                NavigateTo::Amount => menu_state.set(PageState::Amount)
             }
         }
     }

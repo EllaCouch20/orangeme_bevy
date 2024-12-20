@@ -9,7 +9,7 @@ use crate::theme::{
 };
 
 use crate::NavigateTo;
-use crate::primitives::button::primary_default;
+use crate::primitives::button_presets::primary_default;
 use crate::primitives::button::ButtonComponent;
 use crate::primitives::button::CustomButton;
 
@@ -26,7 +26,7 @@ impl Bumper {
                 justify_content: JustifyContent::Center,
                 align_items: AlignItems::Center,
                 flex_direction: FlexDirection::Row,
-                column_gap: Val::Px(16.0),
+                column_gap: Val::Px(8.0),
                 padding: UiRect {
                     top: Val::Px(16.0),
                     bottom: Val::Px(16.0),

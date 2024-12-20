@@ -2,6 +2,8 @@ use bevy::prelude::*;
 
 use super::despawn_screen;
 
+use crate::primitives::button_presets::primary_default;
+
 use crate::{
     menu_plugin,
     NavigateTo
@@ -22,7 +24,7 @@ use crate::primitives::{
     profile_photo::profile_photo,
     button::{
         button_system,
-        primary_default,
+        InteractiveState,
     },
 };
 
@@ -41,8 +43,8 @@ pub fn home_setup(mut commands: Commands, asset_server: Res<AssetServer>, fonts:
     let bumper = Bumper::new();
     let interface = Interface::new();
     
-    let send = primary_default("Send", true, NavigateTo::Address);
-    let receive = primary_default("Receive", true, NavigateTo::Address);
+    let send = primary_default("Send", false, InteractiveState::Default, NavigateTo::Address);
+    let receive = primary_default("Receive", false, InteractiveState::Default, NavigateTo::Address);
 
     commands.spawn((
         interface.node,
@@ -55,7 +57,7 @@ pub fn home_setup(mut commands: Commands, asset_server: Res<AssetServer>, fonts:
             header(parent, &fonts, &asset_server, Header::Home, "Wallet");
 
             parent.spawn(interface.content_centered).with_children(|parent| {
-                balance_display(parent, &fonts);
+                balance_display(parent, &fonts, "$0.00", "0.00000000 BTC");
             });
 
             bumper.button_bumper(parent, &fonts, &asset_server, vec![receive, send]);

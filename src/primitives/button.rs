@@ -21,7 +21,7 @@ pub enum ButtonStyle {
     Ghost,
 }
 
-#[derive(Copy, Clone, Component, PartialEq)]
+#[derive(Copy, Clone, Component, PartialEq, Debug)]
 pub enum InteractiveState {
     Default,
     Selected,
@@ -40,6 +40,7 @@ pub enum ButtonWidth {
     Hug,
 }
 
+#[derive(Component)]
 pub struct CustomButton {
     label: String,
     icon: Option<Icon>,
@@ -47,11 +48,11 @@ pub struct CustomButton {
     style: ButtonStyle,
     width_style: ButtonWidth,
     size: ButtonSize,
-    state: InteractiveState,
+    pub state: InteractiveState,
     action: NavigateTo,
     alignment: JustifyContent,
-    enabled: bool,
     selected: bool,
+    disabled: bool,
 }
 
 impl CustomButton {
@@ -65,8 +66,8 @@ impl CustomButton {
         state: InteractiveState,
         action: NavigateTo,
         alignment: JustifyContent,
-        enabled: bool,
         selected: bool,
+        disabled: bool,
     ) -> Self {
         Self {
             label: label.to_string(),
@@ -78,8 +79,8 @@ impl CustomButton {
             state,
             action,
             alignment,
-            enabled,
             selected,
+            disabled,
         }
     }
 }
@@ -93,19 +94,9 @@ impl ButtonComponent {
         fonts: &Res<FontResources>,
         data: CustomButton,
     ) {
-        let mut status = InteractiveState::Default;
-        
-        if data.enabled {
-            if data.state == InteractiveState::Selected {
-                status = InteractiveState::Selected;
-            } else {
-                status = InteractiveState::Default;
-            }
-        } else {
-            status = InteractiveState::Disabled;
-        }
+        println!("Button state: {:?}", data.state);
 
-        let colors: ButtonColor = ButtonColor::new(data.style, status);
+        let colors: ButtonColor = ButtonColor::new(data.style, data.state);
         let font = fonts.style.label.clone();
 
         let (button_width, flex_grow) = match data.width_style {
@@ -154,7 +145,7 @@ impl ButtonComponent {
                     },
                 ));
             }
-            if let Some(photo) = data.photo {
+            if let Some(photo) = data.photo.clone() {
                 button.spawn(Node {
                     margin: UiRect::right(Val::Px(icon_pad)), 
                     ..default()
@@ -164,7 +155,7 @@ impl ButtonComponent {
             }
 
             button.spawn((
-                Text::new(data.label),
+                Text::new(data.label.clone()),
                 TextFont {
                     font,
                     font_size,
@@ -174,9 +165,10 @@ impl ButtonComponent {
             ));     
         });
 
+        if data.selected { button.insert(SetState::Selectable); }
+        if data.disabled { button.insert(SetState::Disablable); }
         button.insert(data.style);
-        button.insert(status);
-        if data.selected { button.insert(Selectable); }
+        button.insert(data);
     }
 }
 
@@ -187,8 +179,8 @@ pub struct ButtonInteraction {
     pub is_selected: bool,
 }
 
-#[derive(Component)]
-pub struct Selectable;
+#[derive(Component, PartialEq)]
+pub enum SetState{Selectable, Disablable}
 
 pub fn button_system(
     mut interaction_query: Query<
@@ -211,50 +203,14 @@ pub fn button_system(
                         *color = colors.background.into();
                         border_color.0 = colors.outline.into();
                     }
-                    Interaction::None => {
-                        let colors: ButtonColor = ButtonColor::new(*button_style, InteractiveState::Default);
-                        *color = colors.background.into();
-                        border_color.0 = colors.outline.into();
-                    }
                     Interaction::Pressed => {
                         let colors: ButtonColor = ButtonColor::new(*button_style, InteractiveState::Selected);
                         *color = colors.background.into();
                         border_color.0 = colors.outline.into();
                     }
+                    _ => {}
                 }
             }
         }
     }
-}
-
-pub fn primary_default(label: &str, enabled: bool, navigate_to: NavigateTo) -> CustomButton {
-    return CustomButton::new(
-        label,
-        None,
-        None,
-        ButtonStyle::Primary,
-        ButtonWidth::Expand,
-        ButtonSize::Large,
-        InteractiveState::Default,
-        navigate_to,
-        JustifyContent::Center,
-        enabled,
-        false,
-    );
-}
-
-pub fn secondary_default(label: &str, icon: Icon, navigate_to: NavigateTo) -> CustomButton {
-    return CustomButton::new(
-        label,
-        Some(icon),
-        None,
-        ButtonStyle::Secondary,
-        ButtonWidth::Hug,
-        ButtonSize::Medium,
-        InteractiveState::Default,
-        navigate_to,
-        JustifyContent::Center,
-        true,
-        false,
-    );
 }
