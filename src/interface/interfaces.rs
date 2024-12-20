@@ -1,0 +1,59 @@
+use bevy::prelude::*;
+use crate::primitives::profile_photo::profile_photo;
+use std::sync::Arc;
+
+use crate::theme::{
+    color::Display,
+    fonts::FontResources,
+    icons::Icon,
+};
+
+use crate::NavigateTo;
+use crate::primitives::button::primary_default;
+use crate::primitives::button::ButtonComponent;
+use crate::primitives::button::CustomButton;
+
+pub struct Interface {
+    pub node: Node,
+    pub page_node: Node,
+    pub content_centered: Node,
+}
+
+impl Default for Interface {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+const EXPAND: Val = Val::Percent(100.0);
+
+impl Interface {
+    pub fn new() -> Self {
+        Self {
+            node: Node {
+                width: EXPAND,
+                height: EXPAND,
+                align_items: AlignItems::Start,
+                justify_content: JustifyContent::Start,
+                flex_direction: FlexDirection::Row,
+                ..default()
+            },
+            page_node: Node {
+                width: EXPAND,
+                height: EXPAND,
+                align_items: AlignItems::Center,
+                justify_content: JustifyContent::Center,
+                flex_direction: FlexDirection::Column,
+                ..default()
+            },
+            content_centered: Node {
+                width: EXPAND,
+                height: EXPAND,
+                max_width: Val::Px(512.0),
+                align_items: AlignItems::Center,
+                justify_content: JustifyContent::Center,
+                ..default()
+            },
+        }
+    }
+}
