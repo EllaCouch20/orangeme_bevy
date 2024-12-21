@@ -18,6 +18,7 @@ pub mod theme {
 
 pub mod components {
     pub mod balance_display;
+    pub mod amount_display;
     pub mod navigator; 
     pub mod text_input;
     pub mod tip_button;
@@ -42,7 +43,7 @@ use crate::primitives::button::{button_system, InteractiveState};
 
 use crate::home::{OnHomeScreen, home_setup};
 use crate::address::{OnAddressScreen, address_setup};
-use crate::amount::{OnAmountScreen, amount_setup};
+use crate::amount::{OnAmountScreen, amount_setup, keyboard_input_system, amount_display_system};
 use crate::components::text_input::focus;
 
 #[derive(Clone, Copy, Default, Eq, PartialEq, Debug, Hash, States)]
@@ -96,9 +97,16 @@ pub enum PageState {
     Disabled,
 }
 
+#[derive(Resource)]
+pub struct StateData {
+    usd: String,
+}
+
 pub fn menu_plugin(app: &mut App) {
+    let state_data = StateData {usd: "0".to_string()};
     app
         .init_state::<PageState>()
+        .insert_resource(state_data) 
         .add_systems(OnEnter(GameState::Menu), startup_setup)
         .add_systems(OnEnter(PageState::Home), home_setup)
         .add_systems(OnExit(PageState::Home), despawn_screen::<OnHomeScreen>)
@@ -108,6 +116,8 @@ pub fn menu_plugin(app: &mut App) {
         .add_systems(OnExit(PageState::Amount), despawn_screen::<OnAmountScreen>)
         .add_systems(PreStartup, setup_fonts)
         .add_systems(Update, button_system)
+        .add_systems(Update, keyboard_input_system)
+        .add_systems(Update, amount_display_system)
         .add_systems(Update, (menu_action, button_system).run_if(in_state(GameState::Menu)));
 }
 
