@@ -99,11 +99,14 @@ pub enum PageState {
 
 #[derive(Resource)]
 pub struct StateData {
+    balance_usd: f32,
     usd: String,
+    zeros: String,
+    helper: String,
 }
 
 pub fn menu_plugin(app: &mut App) {
-    let state_data = StateData {usd: "0".to_string()};
+    let state_data = StateData {usd: "0".to_string(), zeros: "".to_string(), balance_usd: 25.0, helper: "0.00001234 BTC".to_string()};
     app
         .init_state::<PageState>()
         .insert_resource(state_data) 

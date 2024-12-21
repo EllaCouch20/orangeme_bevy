@@ -34,7 +34,7 @@ use crate::components::{
     text_input::text_input,
     navigator::sidebar_navigator,
     tip_button::tip_buttons,
-    amount_display::{amount_display, AmountDisplay},
+    amount_display::{amount_display, AmountDisplayUsd, AmountDisplayZeros, AmountDisplayHelper},
 };
 
 #[derive(Component)]
@@ -66,7 +66,7 @@ pub fn amount_setup(
             header(parent, &fonts, &asset_server, Header::Stack, "Send bitcoin");
             parent.spawn(interface.content).with_children(|parent| {
                 println!("Updating Balance Display");
-                amount_display(parent, &fonts, &format!("${}", &state_data.usd), "0.00000000 BTC");
+                amount_display(parent, &fonts, &format!("${}", &state_data.usd), &state_data.zeros, &state_data.helper);
             });
             bumper.button_bumper(parent, &fonts, &asset_server, vec![next]);
         });
@@ -76,14 +76,43 @@ pub fn amount_setup(
 
 pub fn amount_display_system(
     state_data: Res<StateData>,
-    mut query: Query<&mut Text, With<AmountDisplay>>,
+    mut query_set: ParamSet<(
+        Query<&mut Text, With<AmountDisplayUsd>>,
+        Query<&mut Text, With<AmountDisplayZeros>>,
+        Query<(&mut Text, &mut TextColor), With<AmountDisplayHelper>>,
+    )>,
 ) {
+    let colors = Display::new();
+    
     if state_data.is_changed() {
-        println!("{:?}", state_data.usd);
-        for mut text in query.iter_mut() {
-            text.0 = format!("${}", state_data.usd);
+        for mut usd in query_set.p0().iter_mut() {
+            usd.0 = format!("${}", state_data.usd);
+        }
+
+        for mut zeros in query_set.p1().iter_mut() {
+            zeros.0 = state_data.zeros.clone();
+        }
+
+        for (mut text, mut text_color) in query_set.p2().iter_mut() {
+            let usd_value: f32 = state_data.usd.parse().unwrap_or(0.0);
+
+            text.0 = if usd_value < state_data.balance_usd {
+                convert_btc(usd_value)
+            } else {
+                "Amount exceeds balance".to_string()
+            };
+
+            text_color.0 = if usd_value < state_data.balance_usd {
+                colors.text_secondary
+            } else {
+                colors.status_danger
+            };
         }
     }
+}
+
+fn convert_btc(usd: f32) -> String {
+    return "0.00001234 BTC".to_string()
 }
 
 use bevy::input::ButtonState;
@@ -94,7 +123,7 @@ pub fn keyboard_input_system(
 ) {
     for event in keyboard_input_events.read() {
         if event.state == ButtonState::Pressed {
-            println!("{:?}", event.key_code);
+            println!("{:?}", event.logical_key);
             match event.key_code {
                 KeyCode::Digit0 |
                 KeyCode::Digit1 |
@@ -108,10 +137,11 @@ pub fn keyboard_input_system(
                 KeyCode::Digit9 |
                 KeyCode::Period |
                 KeyCode::Backspace => {
-                    let (updated_amount, valid_input, _needed_placeholders) =
+                    let (updated_amount, valid_input, needed_placeholders) =
                         update_amount(state_data.usd.clone(), event.key_code);
                     if valid_input {
                         state_data.usd = updated_amount;
+                        state_data.zeros = needed_placeholders;
                     }
                 }
                 _ => {}
@@ -120,7 +150,7 @@ pub fn keyboard_input_system(
     }
 }
 
-pub fn update_amount(amount: String, key: KeyCode) -> (String, bool, u8) {
+pub fn update_amount(amount: String, key: KeyCode) -> (String, bool, String) {
     let is_zero = || amount == "0";
     let zero = "0".to_string();
 
@@ -174,8 +204,15 @@ pub fn update_amount(amount: String, key: KeyCode) -> (String, bool, u8) {
 
     let needed_placeholders = if updated_amount.contains('.') {
         let split: Vec<&str> = updated_amount.split('.').collect();
-        2 - split.get(1).unwrap_or(&"").len() as u8
-    } else { 0 };
+        let fractional_length = split.get(1).unwrap_or(&"").len();
+        match 2 - fractional_length {
+            1 => "0",
+            2 => "00",
+            _ => "",
+        }
+    } else {
+        ""
+    }.to_string();
 
     (updated_amount, valid_input, needed_placeholders)
 }
