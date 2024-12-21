@@ -20,6 +20,7 @@ pub mod theme {
 pub mod components {
     pub mod balance_display;
     pub mod amount_display;
+    pub mod numeric_keypad;
     pub mod navigator; 
     pub mod text_input;
     pub mod tip_button;

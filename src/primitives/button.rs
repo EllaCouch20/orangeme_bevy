@@ -127,6 +127,7 @@ impl ButtonComponent {
                 justify_content: data.alignment,
                 align_items: AlignItems::Center,
                 flex_direction: FlexDirection::Row,
+                column_gap: Val::Px(icon_pad),
                 padding: UiRect {
                     left: Val::Px(padding),
                     right: Val::Px(padding),
@@ -151,11 +152,11 @@ impl ButtonComponent {
                     Node {
                         height: Val::Px(icon_size),
                         width: Val::Px(icon_size),
-                        margin: UiRect::right(Val::Px(icon_pad)), 
                         ..default()
                     },
                 ));
             }
+
             // ===== Option Photo ===== //
             if let Some(photo) = data.photo.clone() {
                 button.spawn(Node {
