@@ -1,11 +1,8 @@
 use bevy::prelude::*;
-
-use crate::theme::{
-    color::Display,
-    fonts::FontResources,
-};
-
+use crate::theme::{color::Display, fonts::FontResources};
 use crate::primitives::button::{CustomButton, ButtonComponent};
+
+// ===== List of Helper Buttons ===== //
 
 pub fn tip_buttons(
     parent: &mut ChildBuilder, 
@@ -23,16 +20,18 @@ pub fn tip_buttons(
         ..default()
     }).with_children(|parent| {
         for (i, button) in buttons.into_iter().enumerate() {
-            ButtonComponent::spawn_button(parent, &asset_server, &fonts, button);
+            ButtonComponent::spawn_button(parent, asset_server, fonts, button);
 
             if buttons_len == 2 && i == 0 {
-                separator_text(parent, &fonts);
+                separator_text(parent, fonts);
             } else if buttons_len >= 3 && i == buttons_len - 2 {
-                separator_text(parent, &fonts);
+                separator_text(parent, fonts);
             }
         }
     });
 }
+
+// ===== Text Separating Buttons ===== //
 
 pub fn separator_text(parent: &mut ChildBuilder, fonts: &Res<FontResources>){
     let font = fonts.style.text.clone();

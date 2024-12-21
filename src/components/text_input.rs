@@ -1,23 +1,29 @@
-
 use bevy::{prelude::*, ui::FocusPolicy};
-use crate::theme::fonts::FontResources;
-use crate::theme::color::{Display, ButtonColor};
-use crate::primitives::button::{CustomButton, InteractiveState, ButtonStyle, SetState};
+
+use crate::{
+    theme::{fonts::FontResources, color::{Display, ButtonColor}},
+    primitives::button::{CustomButton, InteractiveState, ButtonStyle, SetState},
+    utils::EXPAND,
+};
+
 use bevy_simple_text_input::{
     TextInput, 
-    TextInputValue,
+    TextInputValue, 
     TextInputInactive, 
     TextInputPlaceholder, 
     TextInputPlugin, 
-    TextInputSystem,
+    TextInputSystem, 
     TextInputTextColor, 
     TextInputTextFont,
 };
 
 
+// ===== Instanitate Widget ===== //
+
 pub fn text_input(
     parent: &mut ChildBuilder,
     fonts: &Res<FontResources>,
+    placeholder: &str,
 ) {
     let font = fonts.style.text.clone();
     let font_size = fonts.size.md;
@@ -28,7 +34,7 @@ pub fn text_input(
         Node {
             border: UiRect::all(Val::Px(1.0)),
             height: Val::Px(48.0),
-            width: Val::Percent(100.0),
+            width: EXPAND,
             align_items: AlignItems::Center,
             justify_content: JustifyContent::Start,
             padding: UiRect::all(Val::Px(16.0)), 
@@ -46,12 +52,14 @@ pub fn text_input(
         }),
         TextInputTextColor(TextColor(colors.text_primary)),
         TextInputPlaceholder {
-            value: "Bitcoin address...".to_string(),
+            value: placeholder.to_string(),
             ..default()
         },
         TextInputInactive(true),
     ));
 }
+
+// ===== Text Input Visual Handler ===== //
 
 pub fn focus(
     mut interaction_query: Query<
@@ -116,7 +124,7 @@ pub fn focus(
                     *border_color = button_colors.outline.into();
                     for child in children.iter() {
                         if let Ok((mut text_color, _parent)) = text_query.get_mut(*child) {
-                            *text_color = button_colors.label.into(); // Set TextColor to disabled color
+                            *text_color = button_colors.label.into();
                         }
                     }
                 }

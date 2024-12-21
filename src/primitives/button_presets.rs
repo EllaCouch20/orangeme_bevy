@@ -17,6 +17,7 @@ use crate::theme::icons::Icon;
 
 use crate::NavigateTo;
 
+// ===== Commonplace Button Usecases ===== //
 
 pub fn nav_button (label: &str, status: InteractiveState, icon: Icon) -> CustomButton {
     CustomButton::new(
@@ -62,7 +63,7 @@ pub fn nav_button_pfp (mut label: &str, status: InteractiveState) -> CustomButto
 }
 
 pub fn primary_default(label: &str, disabled: bool, state: InteractiveState, navigate_to: NavigateTo) -> CustomButton {
-    return CustomButton::new(
+    CustomButton::new(
         label,
         None,
         None,
@@ -74,11 +75,11 @@ pub fn primary_default(label: &str, disabled: bool, state: InteractiveState, nav
         JustifyContent::Center,
         false,
         disabled,
-    );
+    )
 }
 
 pub fn secondary_default(label: &str, icon: Icon, navigate_to: NavigateTo) -> CustomButton {
-    return CustomButton::new(
+    CustomButton::new(
         label,
         Some(icon),
         None,
@@ -90,5 +91,5 @@ pub fn secondary_default(label: &str, icon: Icon, navigate_to: NavigateTo) -> Cu
         JustifyContent::Center,
         false,
         false,
-    );
+    )
 }

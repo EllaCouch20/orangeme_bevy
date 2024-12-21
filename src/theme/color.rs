@@ -85,7 +85,9 @@ pub struct ButtonColor {
 impl ButtonColor {
     pub fn new(style: ButtonStyle, state: InteractiveState) -> Self {
         match (style, state) {
-            // Primary button styles
+
+            // ===== Primary Button Styles ===== //
+
             (ButtonStyle::Primary, InteractiveState::Default) => ButtonColor {
                 background: Colors::torch_red().shade500,
                 label: Colors::tapa().shade0,
@@ -107,7 +109,8 @@ impl ButtonColor {
                 outline: Colors::transparent().shade0,
             },
 
-            // Secondary button styles
+            // ===== Secondary Button Styles ===== //
+
             (ButtonStyle::Secondary, InteractiveState::Default) => ButtonColor {
                 background: Colors::transparent().shade0,
                 label: Colors::tapa().shade0,
@@ -129,7 +132,8 @@ impl ButtonColor {
                 outline: Colors::tapa().shade700,
             },
 
-            // Ghost button styles
+            // ===== Ghost Button Styles ===== //
+
             (ButtonStyle::Ghost, InteractiveState::Default) => ButtonColor {
                 background: Colors::transparent().shade0,
                 label: Colors::tapa().shade0,
@@ -264,6 +268,8 @@ impl Colors {
     }
 
 }
+
+// ===== Convert Hexcode to SRGB ===== //
 
 pub fn hex(hex: &str) -> Color {
     let hex = hex.trim_start_matches('#');

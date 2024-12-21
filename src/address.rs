@@ -70,7 +70,7 @@ pub fn address_setup(mut commands: Commands, asset_server: Res<AssetServer>, fon
             header(parent, &fonts, &asset_server, Header::Stack, "Bitcoin address");
 
             parent.spawn((interface.content, Interaction::None)).with_children(|parent| { 
-                text_input(parent, &fonts);
+                text_input(parent, &fonts, "Bitcoin address...");
                 tip_buttons(parent, &asset_server, &fonts, vec![paste, scan, contact]);
             });
 

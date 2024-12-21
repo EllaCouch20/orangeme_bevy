@@ -1,17 +1,12 @@
 #![allow(unused)]
 
 use bevy::prelude::*;
-
 use crate::theme::{
     color::ButtonColor,
     fonts::FontResources,
     icons::Icon,
 };
-
-use crate::primitives::{
-    profile_photo::profile_photo
-};
-
+use crate::primitives::{profile_photo::profile_photo};
 use crate::NavigateTo;
 
 #[derive(Copy, Clone, Component, Debug)]
@@ -39,6 +34,15 @@ pub enum ButtonWidth {
     Expand,
     Hug,
 }
+
+#[derive(Component)]
+pub struct ButtonInteraction {
+    pub state: InteractiveState,
+    pub is_selected: bool,
+}
+
+#[derive(Component, PartialEq)]
+pub enum SetState{Selectable, Disablable}
 
 #[derive(Component)]
 pub struct CustomButton {
@@ -94,10 +98,11 @@ impl ButtonComponent {
         fonts: &Res<FontResources>,
         data: CustomButton,
     ) {
-        println!("Button state: {:?}", data.state);
 
         let colors: ButtonColor = ButtonColor::new(data.style, data.state);
         let font = fonts.style.label.clone();
+
+        // ===== Mapping Info From Size ===== //
 
         let (button_width, flex_grow) = match data.width_style {
             ButtonWidth::Expand => (Val::Percent(100.0), 1.0),
@@ -108,6 +113,8 @@ impl ButtonComponent {
             ButtonSize::Large => (48.0, 24.0, 24.0, 12.0, fonts.size.lg),
             ButtonSize::Medium => (32.0, 12.0, 16.0, 4.0, fonts.size.md)
         };
+
+        // ===== Button Background ===== //
 
         let mut button = parent.spawn((
             Button,
@@ -132,8 +139,12 @@ impl ButtonComponent {
             BackgroundColor(colors.background),
             data.action,
         ));
+
+        // ===== Button Innerds ===== //
         
         button.with_children(|button| {
+
+            // ===== Optional Icon ===== //
             if let Some(icon) = data.icon {
                 button.spawn((
                     Icon::new(data.icon.unwrap(), asset_server),
@@ -145,22 +156,20 @@ impl ButtonComponent {
                     },
                 ));
             }
+            // ===== Option Photo ===== //
             if let Some(photo) = data.photo.clone() {
                 button.spawn(Node {
                     margin: UiRect::right(Val::Px(icon_pad)), 
                     ..default()
                 }).with_children(|parent| {
-                    profile_photo(parent, &fonts, &asset_server, &photo);
+                    profile_photo(parent, fonts, asset_server, 32.0, &photo);
                 });
             }
 
+            // ===== Label ===== //
             button.spawn((
                 Text::new(data.label.clone()),
-                TextFont {
-                    font,
-                    font_size,
-                    ..default()
-                },
+                TextFont {font, font_size, ..default()},
                 TextColor(colors.label),
             ));     
         });
@@ -172,15 +181,7 @@ impl ButtonComponent {
     }
 }
 
-
-#[derive(Component)]
-pub struct ButtonInteraction {
-    pub state: InteractiveState,
-    pub is_selected: bool,
-}
-
-#[derive(Component, PartialEq)]
-pub enum SetState{Selectable, Disablable}
+// ===== Button Color Handler ===== //
 
 pub fn button_system(
     mut interaction_query: Query<
@@ -201,12 +202,12 @@ pub fn button_system(
                     Interaction::Hovered => {
                         let colors: ButtonColor = ButtonColor::new(*button_style, InteractiveState::Hover);
                         *color = colors.background.into();
-                        border_color.0 = colors.outline.into();
+                        border_color.0 = colors.outline;
                     }
                     Interaction::Pressed => {
                         let colors: ButtonColor = ButtonColor::new(*button_style, InteractiveState::Selected);
                         *color = colors.background.into();
-                        border_color.0 = colors.outline.into();
+                        border_color.0 = colors.outline;
                     }
                     _ => {}
                 }

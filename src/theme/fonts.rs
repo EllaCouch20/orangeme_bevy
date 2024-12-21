@@ -2,11 +2,15 @@
 use bevy::prelude::*;
 use bevy_ui::prelude::*;
 
+// ===== Global FontResource ===== //
+
 #[derive(Resource)]
 pub struct FontResources {
     pub style: Style,
     pub size: FontSizes,
 }
+
+// ===== All Font Styles ===== //
 
 #[derive(Resource)]
 pub struct Style {
@@ -24,6 +28,8 @@ impl Default for Style {
         }
     }
 }
+
+// ===== All Font Sizes ===== //
 
 #[derive(Resource)]
 pub struct FontSizes {
@@ -59,6 +65,8 @@ impl Default for FontSizes {
         }
     }
 }
+
+// ===== Font System & Loader ===== //
 
 pub fn setup_fonts(mut commands: Commands, asset_server: Res<AssetServer>) {
     let outfit_bold = asset_server.load("fonts/Outfit-Bold.ttf");

@@ -1,28 +1,34 @@
 use bevy::prelude::*;
-use crate::primitives::profile_photo::profile_photo;
-use std::sync::Arc;
 
-use crate::theme::{
-    color::Display,
-    fonts::FontResources,
-    icons::Icon,
+use crate::{
+    primitives::{
+        profile_photo::profile_photo,
+        button_presets::primary_default,
+        button::{ButtonComponent, CustomButton},
+    },
+    theme::{color::Display, fonts::FontResources, icons::Icon},
+    utils::{EXPAND, MAX},
+    NavigateTo,
 };
 
-use crate::NavigateTo;
-use crate::primitives::button_presets::primary_default;
-use crate::primitives::button::ButtonComponent;
-use crate::primitives::button::CustomButton;
+// ===== Bumper Instantiation ===== //
 
 pub struct Bumper {
     bumper_content_node: Node,
     bumper_node: Node,
 }
 
+impl Default for Bumper {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl Bumper {
     pub fn new() -> Self {
         Self {
             bumper_content_node: Node {
-                width: Val::Percent(100.0),
+                width: EXPAND,
                 justify_content: JustifyContent::Center,
                 align_items: AlignItems::Center,
                 flex_direction: FlexDirection::Row,
@@ -31,20 +37,21 @@ impl Bumper {
                     top: Val::Px(16.0),
                     bottom: Val::Px(16.0),
                     left: Val::Px(24.0),
-                    right: Val::Px(24.0),
-                    ..default()
+                    right: Val::Px(24.0)
                 },
                 ..default()
             },
             bumper_node: Node {
-                width: Val::Percent(100.0),
-                max_width: Val::Px(512.0),
+                width: EXPAND,
+                max_width: MAX,
                 align_items: AlignItems::Start,
                 justify_content: JustifyContent::Center,
                 ..default()
             },
         }
     }
+
+    // ===== Bumper Unlimited Buttons ===== //
 
     pub fn button_bumper(
         self,
@@ -54,13 +61,12 @@ impl Bumper {
         buttons: Vec<CustomButton>,
     ) {
         let colors = Display::new();
-        parent.spawn((self.bumper_node)).with_children(|parent| {
+        parent.spawn(self.bumper_node).with_children(|parent| {
             parent.spawn(self.bumper_content_node).with_children(|child| {
                 for button in buttons {
-                    ButtonComponent::spawn_button(child, &asset_server, &fonts, button);
+                    ButtonComponent::spawn_button(child, asset_server, fonts, button);
                 }
             });
         });
     }
-
 }

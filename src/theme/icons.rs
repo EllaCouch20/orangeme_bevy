@@ -3,34 +3,44 @@ use bevy::prelude::*;
 use bevy_ui::prelude::*;
 use crate::NavigateTo;
 
+
+// ===== Icon Options ===== //
+
 #[derive(Component, Copy, Clone)]
 pub enum Icon {
-    Exit,
-    Left,
-    Right,
-    Wallet,
-    Message,
-    Profile,
-    Paste,
-    Scan
+    Back, Bitcoin, Copy,
+    Down, Edit, Error,
+    Exit, File, Folder,
+    Forward, Group, Home,
+    Info, Left, Message,
+    Paste, Profile, Scan,
+    RadioFilled, Radio, 
+    Right, Wallet,
 }
+
+// ===== Icon To ImageNode ===== //
 
 impl Icon {
     pub fn new(self, asset_server: &Res<AssetServer>) -> ImageNode {
         let choice = match self {
-            Icon::Exit => "exit",
-            Icon::Left => "left",
-            Icon::Right => "right",
-            Icon::Wallet => "wallet",
-            Icon::Message => "message",
-            Icon::Profile => "profile",
-            Icon::Paste => "paste",
-            Icon::Scan => "qr-code",
+            Icon::Copy => "copy", Icon::Down => "down",
+            Icon::Exit => "exit", Icon::File => "file",
+            Icon::Info => "info", Icon::Left => "left",
+            Icon::Edit => "edit", Icon::Error => "error",
+            Icon::Group => "group", Icon::Home => "home",
+            Icon::Right => "right", Icon::Wallet => "wallet",
+            Icon::Back => "back", Icon::Bitcoin => "bitcoin",
+            Icon::Message => "message", Icon::Paste => "paste",
+            Icon::Profile => "profile", Icon::Scan => "qr-code",
+            Icon::Folder => "folder", Icon::Forward => "forward",
+            Icon::RadioFilled => "radio-filled", Icon::Radio => "radio",
         };
         let img = format!("icons/{}.png", choice);
         ImageNode::new(asset_server.load(img.as_str()))
     }
 }
+
+// ===== Icon Button ===== //
 
 pub fn icon_button(
     parent: &mut ChildBuilder,

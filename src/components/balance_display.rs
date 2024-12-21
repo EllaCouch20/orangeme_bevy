@@ -2,7 +2,10 @@ use bevy::prelude::*;
 use crate::theme::fonts::FontResources;
 use crate::theme::color::Display;
 use bevy_ui::prelude::*;
+use crate::utils::EXPAND;
 
+
+// ===== Home Balance Widget ===== //
 
 pub fn balance_display(
     parent: &mut ChildBuilder,
@@ -10,19 +13,17 @@ pub fn balance_display(
     usd: &str,
     btc: &str,
 ){
-    let usd_font = fonts.style.label.clone();
-    let usd_font_size = fonts.size.title;
+    let font = fonts.style.label.clone();
+    let font_size = fonts.size.title;
 
     let btc_font = fonts.style.text.clone();
     let btc_font_size = fonts.size.lg;
 
     let colors = Display::new();
-
-    //font_size: txtL <= 4 ? 'title' : txtL <= 7 ? 'h1' : 'h2',
     
     parent.spawn(Node {
-        width: Val::Percent(100.0),
-        height: Val::Percent(100.0),
+        width: EXPAND,
+        height: EXPAND,
         justify_content: JustifyContent::Center,
         align_items: AlignItems::Center,
         flex_direction: FlexDirection::Column,
@@ -32,11 +33,7 @@ pub fn balance_display(
     .with_children(|child| {
         child.spawn((
             Text::new(usd),
-            TextFont {
-                font: usd_font,
-                font_size: usd_font_size,
-                ..default()
-            },
+            TextFont { font, font_size, ..default() },
             TextColor(colors.text_heading),
         ));  
         child.spawn((

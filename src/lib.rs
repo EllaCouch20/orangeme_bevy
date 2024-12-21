@@ -23,6 +23,7 @@ pub mod components {
     pub mod navigator; 
     pub mod text_input;
     pub mod tip_button;
+    pub mod input;
 }
 
 pub mod interface {
@@ -45,7 +46,7 @@ use crate::primitives::button::{button_system, InteractiveState};
 use crate::home::{OnHomeScreen, home_setup};
 use crate::address::{OnAddressScreen, address_setup};
 use crate::amount::{OnAmountScreen, amount_setup};
-use crate::components::amount_display::{keyboard_input_system, amount_display_system};
+use crate::components::input::{keyboard_input_system, amount_display_system};
 use crate::components::text_input::focus;
 
 #[derive(Clone, Copy, Default, Eq, PartialEq, Debug, Hash, States)]
@@ -69,7 +70,7 @@ fn main() {
         .add_plugins(TextInputPlugin)
         .add_systems(Update, focus.before(TextInputSystem))
         .insert_resource(ClearColor(Colors::tapa().shade1000)) 
-        .add_plugins((menu_plugin))
+        .add_plugins(menu_plugin)
         .run();
 }
 
@@ -107,7 +108,7 @@ pub struct StateData {
     helper: String,
 }
 
-pub fn menu_plugin(app: &mut App) {
+fn menu_plugin(app: &mut App) {
     let state_data = StateData {usd: "0".to_string(), zeros: "".to_string(), balance_usd: 25.0, helper: "0.00001234 BTC".to_string()};
     app
         .init_state::<PageState>()
@@ -126,11 +127,11 @@ pub fn menu_plugin(app: &mut App) {
         .add_systems(Update, (menu_action, button_system).run_if(in_state(GameState::Menu)));
 }
 
-pub fn startup_setup(mut menu_state: ResMut<NextState<PageState>>) {
+fn startup_setup(mut menu_state: ResMut<NextState<PageState>>) {
     menu_state.set(PageState::Home);
 }
 
-pub fn menu_action(
+fn menu_action(
     interaction_query: Query<
         (&Interaction, &NavigateTo),
         (Changed<Interaction>, With<Button>),

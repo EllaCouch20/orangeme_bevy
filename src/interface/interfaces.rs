@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 use crate::primitives::profile_photo::profile_photo;
-use std::sync::Arc;
+use crate::utils::EXPAND;
 
 use crate::theme::{
     color::Display,
@@ -25,7 +25,7 @@ impl Default for Interface {
     }
 }
 
-const EXPAND: Val = Val::Percent(100.0);
+// ===== Commonplace Interface Nodes ===== //
 
 impl Interface {
     pub fn new() -> Self {

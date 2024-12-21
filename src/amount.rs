@@ -3,6 +3,7 @@ use crate::StateData;
 
 use super::despawn_screen;
 use crate::primitives::button_presets::primary_default;
+use crate::utils::usd_to_btc;
 
 use crate::{
     menu_plugin,
@@ -59,7 +60,7 @@ pub fn amount_setup(
     .with_children(|parent| {
         sidebar_navigator(parent, &fonts, &asset_server);
 
-        parent.spawn((interface.page_node)).with_children(|parent| {
+        parent.spawn(interface.page_node).with_children(|parent| {
             header(parent, &fonts, &asset_server, Header::Stack, "Send bitcoin");
             parent.spawn(interface.content).with_children(|parent| {
                 amount_display(parent, &fonts, &format!("${}", &state_data.usd), &state_data.zeros, &state_data.helper);
@@ -69,8 +70,6 @@ pub fn amount_setup(
     });
     
 }
-
-
 
 pub fn amount_display_system(
     state_data: Res<StateData>,
@@ -107,8 +106,4 @@ pub fn amount_display_system(
             };
         }
     }
-}
-
-fn usd_to_btc(usd: f32) -> String {
-    return "0.00001234 BTC".to_string()
 }

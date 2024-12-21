@@ -1,14 +1,21 @@
 use bevy::prelude::*;
-use crate::theme::fonts::FontResources;
-use crate::theme::color::Display;
-use bevy_ui::prelude::*;
 
-use crate::primitives::button_presets::{nav_button, nav_button_pfp};
-use crate::primitives::button::ButtonComponent;
-use crate::InteractiveState;
-use crate::theme::icons::Icon;
+use crate::{
+    theme::{
+        fonts::FontResources,
+        color::Display,
+        icons::Icon,
+    },
+    primitives::{
+        button_presets::{nav_button, nav_button_pfp},
+        button::ButtonComponent,
+    },
+    utils::{EXPAND, spacer},
+    NavigateTo,
+    InteractiveState,
+};
 
-use crate::NavigateTo;
+// ===== Desktop Sidebar Navigation ===== //
 
 pub fn sidebar_navigator (
     parent: &mut ChildBuilder,
@@ -20,16 +27,15 @@ pub fn sidebar_navigator (
     let font_size = fonts.size.title;
     let colors = Display::new();
 
-    parent.spawn((
-        Node {
-            width: Val::Px(300.0),
-            height: Val::Percent(100.0),
-            align_items: AlignItems::Start,
-            justify_content: JustifyContent::Start,
-            ..default()
-        }
-    ))
-    .with_children(|parent| {
+    parent.spawn(Node {
+        width: Val::Px(300.0),
+        height: EXPAND,
+        align_items: AlignItems::Start,
+        justify_content: JustifyContent::Start,
+        ..default()
+    }).with_children(|parent| {
+
+        // ===== Instanitate Buttons ===== //
 
         let wallet = nav_button("Bitcoin", InteractiveState::Selected, Icon::Wallet);
         let message = nav_button("Message", InteractiveState::Default, Icon::Message);
@@ -37,8 +43,8 @@ pub fn sidebar_navigator (
 
         parent.spawn((
             Node {
-                width: Val::Percent(100.0),
-                height: Val::Percent(100.0),
+                width: EXPAND,
+                height: EXPAND,
                 border: UiRect::right(Val::Px(1.0)),
                 justify_content: JustifyContent::Center,
                 align_items: AlignItems::Center,
@@ -55,6 +61,9 @@ pub fn sidebar_navigator (
             },
             BorderColor(colors.outline_secondary),
         )).with_children(|child| {
+
+            // ===== orange Logo ===== //
+
             child.spawn((
                 ImageNode::new(asset_server.load("wordmark.png")),
                 Node { 
@@ -63,34 +72,29 @@ pub fn sidebar_navigator (
                 },
             ));
 
+            // ===== Button List ===== //
+
             child.spawn(Node {
-                width: Val::Percent(100.0),
+                width: EXPAND,
                 justify_content: JustifyContent::Center,
                 align_items: AlignItems::Center,
                 flex_direction: FlexDirection::Column,
                 row_gap: Val::Px(8.0), 
                 ..default()
             }).with_children(|child| {
-                ButtonComponent::spawn_button(child, &asset_server, &fonts, wallet);
-                ButtonComponent::spawn_button(child, &asset_server, &fonts, message);
+                ButtonComponent::spawn_button(child, asset_server, fonts, wallet);
+                ButtonComponent::spawn_button(child, asset_server, fonts, message);
             });
 
             spacer(child);
+
+            // ===== Profile Button ===== //
             
-            child.spawn(Node {
-                width: Val::Percent(100.0),
-                ..default()
+            child.spawn(Node { 
+                width: EXPAND, ..default()
             }).with_children(|child| {
-                ButtonComponent::spawn_button(child, &asset_server, &fonts, profile);
+                ButtonComponent::spawn_button(child, asset_server, fonts, profile);
             });
         });
-    });
-}
-
-fn spacer (parent: &mut ChildBuilder) {
-    parent.spawn(Node {
-        width: Val::Percent(100.0),
-        height: Val::Percent(100.0),
-        ..default()
     });
 }

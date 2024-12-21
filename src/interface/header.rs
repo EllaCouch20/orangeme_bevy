@@ -1,14 +1,9 @@
 use bevy::prelude::*;
 use crate::primitives::profile_photo::profile_photo;
-use std::sync::Arc;
-
 use crate::NavigateTo;
+use crate::theme::{ color::Display, fonts::FontResources, icons::{Icon, icon_button} };
 
-use crate::theme::{
-    color::Display,
-    fonts::FontResources,
-    icons::{Icon, icon_button},
-};
+// ===== Header ===== //
 
 pub enum Header {
     Home,
@@ -34,20 +29,22 @@ pub fn header(
         ..default()
     };
 
+    // ===== Different Header Types ===== //
+
     match header_type {
         Header::Home => {
-            parent.spawn((header_node)).with_children(|parent| { 
-                header_icon(None, parent, &asset_server);
-                // profile_photo(parent, &fonts, &asset_server, "profile_photo.png");  // Mobile Only
-                header_title(title, fonts.size.h3, parent, &fonts);
-                header_icon(None, parent, &asset_server);
+            parent.spawn(header_node).with_children(|parent| { 
+                header_icon(None, parent, asset_server);
+                // profile_photo(parent, fonts, asset_server, "profile_photo.png");  // Mobile Only
+                header_title(title, fonts.size.h3, parent, fonts);
+                header_icon(None, parent, asset_server);
             });
         },
         Header::Stack => {
-            parent.spawn((header_node)).with_children(|parent| { 
-                header_icon(Some(Icon::Left), parent, &asset_server);
-                header_title(title, fonts.size.h4, parent, &fonts);
-                header_icon(None, parent, &asset_server);
+            parent.spawn(header_node).with_children(|parent| { 
+                header_icon(Some(Icon::Left), parent, asset_server);
+                header_title(title, fonts.size.h4, parent, fonts);
+                header_icon(None, parent, asset_server);
             });
         }
     }
@@ -60,11 +57,12 @@ pub fn header_title(
     fonts: &Res<FontResources>,
 ){
     let colors = Display::new();
+    let font = fonts.style.heading.clone();
 
     parent.spawn((
         Text::new(title),
         TextFont {
-            font: fonts.style.heading.clone(),
+            font,
             font_size,
             ..default()
         },
@@ -79,7 +77,7 @@ pub fn header_icon(
 ){
     let colors = Display::new();
     if let Some(icon) = icon { 
-        icon_button(parent, &asset_server, icon, NavigateTo::Home);
+        icon_button(parent, asset_server, icon, NavigateTo::Home);
     } else {
         parent.spawn((
             Node {
