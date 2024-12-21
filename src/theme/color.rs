@@ -67,7 +67,7 @@ impl IconColor {
                 color: Colors::tapa().shade200,
             },
             InteractiveState::Selected => IconColor {
-                color: Colors::tapa().shade0,
+                color: Colors::tapa().shade200,
             },
         }
     }

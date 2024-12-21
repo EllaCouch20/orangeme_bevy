@@ -37,7 +37,8 @@ pub fn header(
     match header_type {
         Header::Home => {
             parent.spawn((header_node)).with_children(|parent| { 
-                profile_photo(parent, &fonts, &asset_server, "profile_photo.png");
+                header_icon(None, parent, &asset_server);
+                // profile_photo(parent, &fonts, &asset_server, "profile_photo.png");  // Mobile Only
                 header_title(title, fonts.size.h3, parent, &fonts);
                 header_icon(None, parent, &asset_server);
             });

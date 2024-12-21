@@ -3,6 +3,7 @@
 mod home;
 mod address;
 mod amount;
+mod utils;
 
 pub mod primitives { 
     pub mod button; 
@@ -43,7 +44,8 @@ use crate::primitives::button::{button_system, InteractiveState};
 
 use crate::home::{OnHomeScreen, home_setup};
 use crate::address::{OnAddressScreen, address_setup};
-use crate::amount::{OnAmountScreen, amount_setup, keyboard_input_system, amount_display_system};
+use crate::amount::{OnAmountScreen, amount_setup};
+use crate::components::amount_display::{keyboard_input_system, amount_display_system};
 use crate::components::text_input::focus;
 
 #[derive(Clone, Copy, Default, Eq, PartialEq, Debug, Hash, States)]

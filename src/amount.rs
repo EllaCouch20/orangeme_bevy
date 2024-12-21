@@ -40,9 +40,6 @@ use crate::components::{
 #[derive(Component)]
 pub struct OnAmountScreen;
 
-use bevy::input::keyboard::{Key, KeyboardInput};
-use std::fmt::Write; 
-
 pub fn amount_setup(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
@@ -65,7 +62,6 @@ pub fn amount_setup(
         parent.spawn((interface.page_node)).with_children(|parent| {
             header(parent, &fonts, &asset_server, Header::Stack, "Send bitcoin");
             parent.spawn(interface.content).with_children(|parent| {
-                println!("Updating Balance Display");
                 amount_display(parent, &fonts, &format!("${}", &state_data.usd), &state_data.zeros, &state_data.helper);
             });
             bumper.button_bumper(parent, &fonts, &asset_server, vec![next]);
@@ -73,6 +69,8 @@ pub fn amount_setup(
     });
     
 }
+
+
 
 pub fn amount_display_system(
     state_data: Res<StateData>,
@@ -97,7 +95,7 @@ pub fn amount_display_system(
             let usd_value: f32 = state_data.usd.parse().unwrap_or(0.0);
 
             text.0 = if usd_value < state_data.balance_usd {
-                convert_btc(usd_value)
+                usd_to_btc(usd_value)
             } else {
                 "Amount exceeds balance".to_string()
             };
@@ -111,108 +109,6 @@ pub fn amount_display_system(
     }
 }
 
-fn convert_btc(usd: f32) -> String {
+fn usd_to_btc(usd: f32) -> String {
     return "0.00001234 BTC".to_string()
-}
-
-use bevy::input::ButtonState;
-
-pub fn keyboard_input_system(
-    mut keyboard_input_events: EventReader<KeyboardInput>,
-    mut state_data: ResMut<StateData>,
-) {
-    for event in keyboard_input_events.read() {
-        if event.state == ButtonState::Pressed {
-            println!("{:?}", event.logical_key);
-            match event.key_code {
-                KeyCode::Digit0 |
-                KeyCode::Digit1 |
-                KeyCode::Digit2 |
-                KeyCode::Digit3 |
-                KeyCode::Digit4 |
-                KeyCode::Digit5 |
-                KeyCode::Digit6 |
-                KeyCode::Digit7 |
-                KeyCode::Digit8 |
-                KeyCode::Digit9 |
-                KeyCode::Period |
-                KeyCode::Backspace => {
-                    let (updated_amount, valid_input, needed_placeholders) =
-                        update_amount(state_data.usd.clone(), event.key_code);
-                    if valid_input {
-                        state_data.usd = updated_amount;
-                        state_data.zeros = needed_placeholders;
-                    }
-                }
-                _ => {}
-            }
-        }
-    }
-}
-
-pub fn update_amount(amount: String, key: KeyCode) -> (String, bool, String) {
-    let is_zero = || amount == "0";
-    let zero = "0".to_string();
-
-    let (updated_amount, valid_input) = match key {
-        KeyCode::Backspace => {
-            if is_zero() {
-                (zero, false)
-            } else if amount.len() == 1 {
-                (zero, true)
-            } else {
-                (amount[..amount.len() - 1].to_string(), true)
-            }
-        },
-        KeyCode::Period => {
-            if !amount.contains('.') && amount.len() <= 7 {
-                (format!("{}{}", amount, "."), true)
-            } else {
-                (amount.clone(), false)
-            }
-        },
-        _ => {
-            let input = match key {
-                KeyCode::Digit0 => '0',
-                KeyCode::Digit1 => '1',
-                KeyCode::Digit2 => '2',
-                KeyCode::Digit3 => '3',
-                KeyCode::Digit4 => '4',
-                KeyCode::Digit5 => '5',
-                KeyCode::Digit6 => '6',
-                KeyCode::Digit7 => '7',
-                KeyCode::Digit8 => '8',
-                KeyCode::Digit9 => '9',
-                _ => unreachable!(),
-            };
-            if is_zero() {
-                (input.to_string(), true)
-            } else if amount.contains('.') {
-                let split: Vec<&str> = amount.split('.').collect();
-                if amount.len() < 11 && split[1].len() < 2 {
-                    (format!("{}{}", amount, input), true)
-                } else {
-                    (amount.clone(), false)
-                }
-            } else if amount.len() < 10 {
-                (format!("{}{}", amount, input), true)
-            } else {
-                (amount.clone(), false)
-            }
-        }
-    };
-
-    let needed_placeholders = if updated_amount.contains('.') {
-        let split: Vec<&str> = updated_amount.split('.').collect();
-        let fractional_length = split.get(1).unwrap_or(&"").len();
-        match 2 - fractional_length {
-            1 => "0",
-            2 => "00",
-            _ => "",
-        }
-    } else {
-        ""
-    }.to_string();
-
-    (updated_amount, valid_input, needed_placeholders)
 }
