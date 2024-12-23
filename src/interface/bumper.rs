@@ -8,7 +8,7 @@ use crate::{
     },
     theme::{color::Display, fonts::FontResources, icons::Icon},
     utils::{EXPAND, MAX},
-    NavigateTo,
+    Nav,
 };
 
 // ===== Bumper Instantiation ===== //
@@ -16,6 +16,7 @@ use crate::{
 pub struct Bumper {
     bumper_content_node: Node,
     bumper_node: Node,
+    bttn: Node,
 }
 
 impl Default for Bumper {
@@ -48,6 +49,10 @@ impl Bumper {
                 justify_content: JustifyContent::Center,
                 ..default()
             },
+            bttn: Node {
+                width: EXPAND,
+                ..default()
+            },
         }
     }
 
@@ -58,13 +63,15 @@ impl Bumper {
         parent: &mut ChildBuilder,
         fonts: &Res<FontResources>,
         asset_server: &Res<AssetServer>,
-        buttons: Vec<CustomButton>,
+        buttons: Vec<(CustomButton, Nav)>,
     ) {
         let colors = Display::new();
         parent.spawn(self.bumper_node).with_children(|parent| {
-            parent.spawn(self.bumper_content_node).with_children(|child| {
-                for button in buttons {
-                    ButtonComponent::spawn_button(child, asset_server, fonts, button);
+            parent.spawn(self.bumper_content_node).with_children(|parent| {
+                for (button, nav) in buttons {
+                    parent.spawn((self.bttn.clone(), nav)).with_children(|parent|{
+                        ButtonComponent::spawn_button(parent, asset_server, fonts, button);
+                    });
                 }
             });
         });

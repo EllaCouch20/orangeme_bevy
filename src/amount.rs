@@ -7,7 +7,7 @@ use crate::utils::usd_to_btc;
 
 use crate::{
     menu_plugin,
-    NavigateTo
+    Nav
 };
 
 use crate::theme::{
@@ -17,7 +17,7 @@ use crate::theme::{
 };
 
 use crate::interface::{
-    header::{ header, Header },
+    header::Header,
     bumper::Bumper,
     interfaces::Interface
 };
@@ -27,7 +27,6 @@ use crate::primitives::{
     button::{
         InteractiveState,
         ButtonComponent,
-        button_system,
     },
 };
 
@@ -50,8 +49,7 @@ pub fn amount_setup(
 ) {
     let bumper = Bumper::new();
     let interface = Interface::new();
-
-    let next = primary_default("Continue", false, InteractiveState::Default, NavigateTo::Speed);
+    let header = Header::new();
 
     commands.spawn((
         interface.node,
@@ -61,11 +59,14 @@ pub fn amount_setup(
         sidebar_navigator(parent, &fonts, &asset_server);
 
         parent.spawn(interface.page_node).with_children(|parent| {
-            header(parent, &fonts, &asset_server, &colors, Header::Stack, "Send bitcoin");
+            header.stack_header(parent, &fonts, &asset_server, &colors, Some(Icon::Left), "Send bitcoin", Nav::Address);
+
             parent.spawn(interface.content).with_children(|parent| {
-                amount_display(parent, &fonts, &colors, None, &state_data.zeros, &state_data.helper);
+                amount_display(parent, &fonts, &colors, None, &state_data.zeros, &format!("${}", &state_data.usd));
             });
-            bumper.button_bumper(parent, &fonts, &asset_server, vec![next]);
+            bumper.button_bumper(parent, &fonts, &asset_server, vec![
+                (primary_default("Continue"), Nav::Speed)
+            ]);
         });
     });
     

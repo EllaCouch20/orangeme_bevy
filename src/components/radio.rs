@@ -10,6 +10,7 @@ use crate::theme::color::Display;
 use crate::utils::{EXPAND, text};
 use crate::theme::icons::Icon;
 use crate::StateData;
+use crate::speed::RadioButtonState;
 
 use crate::components::amount_display::{AmountDisplayUsd, AmountDisplayZeros, AmountDisplayHelper};
 
@@ -17,7 +18,6 @@ use crate::components::amount_display::{AmountDisplayUsd, AmountDisplayZeros, Am
 
 #[derive(Component)]
 pub struct RadioButton;
-
 pub fn radio_button(
     parent: &mut ChildBuilder,
     fonts: &Res<FontResources>,
@@ -26,7 +26,8 @@ pub fn radio_button(
     title: &str,
     subtitle: &str,
     index: u8,
-){
+    selected: bool,
+) {
     let title_font = fonts.style.heading.clone();
     let title_size = fonts.size.h5;
 
@@ -46,33 +47,65 @@ pub fn radio_button(
                 ..default()
             },
             ..default()
-        }, 
-        RadioButton,
+        },
         Button,
-    )).with_children(|parent| { 
+        RadioButtonState { selected },
+        RadioButton,
+    ))
+    .with_children(|parent| {
         parent.spawn((
-            Icon::new(Icon::Radio, asset_server),
+
+            if selected {
+                Icon::new(Icon::RadioFilled, asset_server)
+            } else {
+                Icon::new(Icon::Radio, asset_server)
+            },
+
             Node {
                 height: Val::Px(32.0),
                 width: Val::Px(32.0),
                 ..default()
             },
         ));
+
         parent.spawn(Node {
             width: EXPAND,
             height: EXPAND,
             justify_content: JustifyContent::Center,
             align_items: AlignItems::Start,
             flex_direction: FlexDirection::Column,
-            row_gap: Val::Px(4.0), 
+            row_gap: Val::Px(4.0),
             ..default()
-        }).with_children(|parent| {
-            parent.spawn(
-                text(title, title_font, title_size, colors.text_heading),
-            );
-            parent.spawn(
-                text(subtitle, sub_font, sub_size, colors.text_secondary),
-            );
-        });  
-    });  
+        })
+        .with_children(|parent| {
+            parent.spawn(text(title, title_font, title_size, colors.text_heading));
+            parent.spawn(text(subtitle, sub_font, sub_size, colors.text_secondary));
+        });
+    });
+}
+
+pub fn toggle_radio_buttons(
+    mut commands: Commands,
+    asset_server: Res<AssetServer>,
+    mut interaction_query: Query<(
+        Entity,
+        &Interaction,
+        &mut RadioButtonState,
+    ), (Changed<Interaction>, With<Button>)>,
+    mut image_query: Query<(&mut ImageNode, &Parent)>,
+    parent_query: Query<&RadioButton>,
+) {
+    for (entity, interaction, mut state) in &mut interaction_query {
+        if *interaction == Interaction::Pressed {
+            for (mut image_node, parent) in &mut image_query {
+                if let Ok(radio_button_state) = parent_query.get(parent.get()) {
+                    state.selected = !state.selected;
+                    *image_node = Icon::new(Icon::RadioFilled, &asset_server);
+                    if state.selected {
+                        *image_node = Icon::new(Icon::Radio, &asset_server);
+                    }
+                }
+            }
+        }
+    }
 }

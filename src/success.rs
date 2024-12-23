@@ -27,8 +27,9 @@ use crate::primitives::{
     },
 };
 
-use crate::primitives::button_presets::{primary_default, secondary_default};
+use crate::primitives::button_presets::{secondary_wide, secondary_default};
 use crate::components::radio::radio_button;
+use crate::utils::text;
 
 use crate::components::{
     navigator::sidebar_navigator,
@@ -36,15 +37,9 @@ use crate::components::{
 
 
 #[derive(Component)]
-pub struct OnSpeedScreen;
+pub struct OnSuccessScreen;
 
-#[derive(Component)]
-pub struct RadioButtonState {
-    pub selected: bool,
-}
-
-
-pub fn speed_setup(
+pub fn success_setup(
     mut commands: Commands, 
     asset_server: Res<AssetServer>, 
     fonts: Res<FontResources>,
@@ -55,22 +50,32 @@ pub fn speed_setup(
     let interface = Interface::new();
     let header = Header::new();
 
+    let font = fonts.style.heading.clone();
+    let size = fonts.size.h3;
+
     commands.spawn((
         interface.node,
-        OnSpeedScreen,
+        OnSuccessScreen,
     )).with_children(|parent| {
         sidebar_navigator(parent, &fonts, &asset_server);
 
         parent.spawn(interface.page_node).with_children(|parent| {
-            header.stack_header(parent, &fonts, &asset_server, &colors, Some(Icon::Left), "Transaction speed", Nav::Amount);
+            header.stack_header(parent, &fonts, &asset_server, &colors, Some(Icon::Close), "Send confirmed", Nav::Home);
 
-            parent.spawn(interface.content).with_children(|parent| { 
-                radio_button(parent, &fonts, &colors, &asset_server, "Standard", "Arrives in ~2 hours\n$0.18 bitcoin network fee", 0, true);
-                radio_button(parent, &fonts, &colors, &asset_server, "Priority", "Arrives in ~30 minutes\n$0.35 bitcoin network fee", 0, false);
+            parent.spawn(interface.content_centered).with_children(|parent| { 
+                parent.spawn((
+                    Icon::new(Icon::Bitcoin, &asset_server),
+                    Node {
+                        height: Val::Px(128.0),
+                        width: Val::Px(128.0),
+                        ..default()
+                    },
+                ));
+                parent.spawn(text("You sent $10.00", font, size, colors.text_heading));
             });
             
             bumper.button_bumper(parent, &fonts, &asset_server, vec![
-                (primary_default("Continue"), Nav::Confirm)
+                (secondary_wide("Done"), Nav::Home)
             ]);
         });
     });

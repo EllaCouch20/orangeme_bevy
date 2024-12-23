@@ -11,7 +11,7 @@ use crate::{
         button::ButtonComponent,
     },
     utils::{EXPAND, spacer},
-    NavigateTo,
+    Nav,
     InteractiveState,
 };
 
@@ -37,9 +37,9 @@ pub fn sidebar_navigator (
 
         // ===== Instanitate Buttons ===== //
 
-        let wallet = nav_button("Bitcoin", InteractiveState::Selected, Icon::Wallet);
-        let message = nav_button("Message", InteractiveState::Default, Icon::Message);
-        let profile = nav_button_pfp("Ella Couch", InteractiveState::Default);
+        let wallet = nav_button("Bitcoin", Icon::Wallet);
+        let message = nav_button("Message", Icon::Message);
+        let profile = nav_button_pfp("Ella Couch");
 
         parent.spawn((
             Node {

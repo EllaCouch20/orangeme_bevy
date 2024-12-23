@@ -6,7 +6,7 @@ use crate::primitives::button_presets::primary_default;
 
 use crate::{
     menu_plugin,
-    NavigateTo
+    Nav
 };
 
 use crate::theme::{
@@ -15,24 +15,20 @@ use crate::theme::{
 };
 
 use crate::interface::{
-    header::{ header, Header },
+    header::Header,
     bumper::Bumper,
     interfaces::Interface
 };
 
 use crate::primitives::{
     profile_photo::profile_photo,
-    button::{
-        button_system,
-        InteractiveState,
-    },
+    button::InteractiveState,
 };
 
 use crate::components::{
     balance_display::balance_display,
     navigator::sidebar_navigator,
 };
-
 
 #[derive(Component)]
 pub struct OnHomeScreen;
@@ -46,9 +42,10 @@ pub fn home_setup(
 
     let bumper = Bumper::new();
     let interface = Interface::new();
-    
-    let send = primary_default("Send", false, InteractiveState::Default, NavigateTo::Address);
-    let receive = primary_default("Receive", false, InteractiveState::Default, NavigateTo::Address);
+    let header = Header::new();
+
+    let balance_usd = "$0.00";
+    let balance_btc = "0.00001234 BTC";
 
     commands.spawn((
         interface.node,
@@ -58,13 +55,16 @@ pub fn home_setup(
         sidebar_navigator(parent, &fonts, &asset_server);
 
         parent.spawn(interface.page_node).with_children(|parent| {
-            header(parent, &fonts, &asset_server, &colors, Header::Home, "Wallet");
+            header.home_header(parent, &fonts, &asset_server, &colors, "Wallet");
 
             parent.spawn(interface.content_centered).with_children(|parent| {
-                balance_display(parent, &fonts, "$0.00", "0.00000000 BTC");
+                balance_display(parent, &fonts, balance_usd, balance_btc);
             });
 
-            bumper.button_bumper(parent, &fonts, &asset_server, vec![receive, send]);
+            bumper.button_bumper(parent, &fonts, &asset_server, vec![
+                (primary_default("Receive"), Nav::Address), 
+                (primary_default("Send"), Nav::Address)
+            ]);
         });
     });
 }

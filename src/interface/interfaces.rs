@@ -8,7 +8,7 @@ use crate::theme::{
     icons::Icon,
 };
 
-use crate::NavigateTo;
+use crate::Nav;
 use crate::primitives::button::ButtonComponent;
 use crate::primitives::button::CustomButton;
 
@@ -54,6 +54,12 @@ impl Interface {
                 justify_content: JustifyContent::Start,
                 flex_direction: FlexDirection::Column,
                 row_gap: Val::Px(24.0),
+                padding: UiRect {
+                    left: Val::Px(24.0),
+                    right: Val::Px(24.0),
+                    top: Val::Px(16.0),
+                    bottom: Val::Px(16.0),
+                },
                 ..default()
             },
             content_centered: Node {
@@ -62,6 +68,8 @@ impl Interface {
                 max_width: Val::Px(512.0),
                 align_items: AlignItems::Center,
                 justify_content: JustifyContent::Center,
+                flex_direction: FlexDirection::Column,
+                row_gap: Val::Px(24.0),
                 ..default()
             },
         }

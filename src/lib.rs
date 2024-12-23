@@ -5,6 +5,8 @@ mod address;
 mod amount;
 mod utils;
 mod speed;
+mod confirm;
+mod success;
 
 pub mod primitives { 
     pub mod button; 
@@ -43,14 +45,22 @@ use theme::{
     fonts::setup_fonts
 };
 
-use crate::theme::color::Display;
+use crate::theme::color::{Display, ButtonColor};
 use bevy_simple_text_input::{TextInputPlugin, TextInputSystem};
-use crate::primitives::button::{button_system, button_status_system, InteractiveState};
+use crate::primitives::button::{
+    button_status_system, 
+    InteractiveState,
+    ButtonStyle,
+};
+
+use crate::components::radio::toggle_radio_buttons;
 
 use crate::home::{OnHomeScreen, home_setup};
 use crate::address::{OnAddressScreen, address_setup};
 use crate::amount::{OnAmountScreen, amount_setup};
 use crate::speed::{OnSpeedScreen, speed_setup};
+use crate::confirm::{OnConfirmScreen, confirm_setup};
+use crate::success::{OnSuccessScreen, success_setup};
 use crate::components::input::{keyboard_input_system, amount_display_system};
 use crate::components::text_input::text_input_visuals_system;
 
@@ -90,11 +100,13 @@ fn despawn_screen<T: Component>(to_despawn: Query<Entity, With<T>>, mut commands
 }
 
 #[derive(Component, Clone, Copy)]
-pub enum NavigateTo {
+pub enum Nav {
     Home,
     Amount,
     Address,
+    Confirm,
     Speed,
+    Success,
 }
 
 #[derive(Clone, Copy, Default, Eq, PartialEq, Debug, Hash, States)]
@@ -102,7 +114,9 @@ pub enum PageState {
     Home,
     Amount,
     Address,
+    Confirm,
     Speed,
+    Success,
     #[default]
     Disabled,
 }
@@ -117,7 +131,14 @@ pub struct StateData {
 
 fn menu_plugin(app: &mut App) {
     let colors = Display::new();
-    let state_data = StateData {usd: "0".to_string(), zeros: "".to_string(), balance_usd: 25.0, helper: "0.00001234 BTC".to_string()};
+
+    let state_data = StateData {
+        usd: "0".to_string(), 
+        zeros: "".to_string(), 
+        balance_usd: 25.0, 
+        helper: "0.00001234 BTC".to_string()
+    };
+
     app
         .init_state::<PageState>()
         .insert_resource(state_data) 
@@ -131,12 +152,17 @@ fn menu_plugin(app: &mut App) {
         .add_systems(OnExit(PageState::Amount), despawn_screen::<OnAmountScreen>)
         .add_systems(OnEnter(PageState::Speed), speed_setup)
         .add_systems(OnExit(PageState::Speed), despawn_screen::<OnSpeedScreen>)
+        .add_systems(OnEnter(PageState::Confirm), confirm_setup)
+        .add_systems(OnExit(PageState::Confirm), despawn_screen::<OnConfirmScreen>)
+        .add_systems(OnEnter(PageState::Success), success_setup)
+        .add_systems(OnExit(PageState::Success), despawn_screen::<OnSuccessScreen>)
         .add_systems(PreStartup, setup_fonts)
-        .add_systems(Update, button_system)
         .add_systems(Update, keyboard_input_system)
         .add_systems(Update, amount_display_system)
         .add_systems(Update, button_status_system)
-        .add_systems(Update, (menu_action, button_system).run_if(in_state(GameState::Menu)));
+        .add_systems(Update, button_system)
+        .add_systems(Update, toggle_radio_buttons)
+        .add_systems(Update, menu_action.run_if(in_state(GameState::Menu)));
 }
 
 fn startup_setup(mut menu_state: ResMut<NextState<PageState>>) {
@@ -145,20 +171,74 @@ fn startup_setup(mut menu_state: ResMut<NextState<PageState>>) {
 
 fn menu_action(
     interaction_query: Query<
-        (&Interaction, &NavigateTo),
+        (&Interaction, &Parent, &InteractiveState),
         (Changed<Interaction>, With<Button>),
     >,
+    nav_query: Query<&Nav>,
     mut app_exit_events: EventWriter<AppExit>,
     mut menu_state: ResMut<NextState<PageState>>,
     mut game_state: ResMut<NextState<GameState>>,
 ) {
-    for (interaction, menu_button_action) in &interaction_query {
-        if *interaction == Interaction::Pressed {
-            match menu_button_action {
-                NavigateTo::Home => menu_state.set(PageState::Home),
-                NavigateTo::Address => menu_state.set(PageState::Address),
-                NavigateTo::Amount => menu_state.set(PageState::Amount),
-                NavigateTo::Speed => menu_state.set(PageState::Speed)
+    for (interaction, parent, state) in &interaction_query {
+        if *interaction == Interaction::Pressed && *state != InteractiveState::Disabled {
+            if let Ok(nav) = nav_query.get(parent.get()) {
+                match nav {
+                    Nav::Home => {
+                        menu_state.set(PageState::Home);
+                    }
+                    Nav::Address => {
+                        menu_state.set(PageState::Address);
+                    }
+                    Nav::Amount => {
+                        menu_state.set(PageState::Amount);
+                    }
+                    Nav::Speed => {
+                        menu_state.set(PageState::Speed);
+                    }
+                    Nav::Confirm => {
+                        menu_state.set(PageState::Confirm);
+                    }
+                    Nav::Success => {
+                        menu_state.set(PageState::Success);
+                    }
+                }
+            }
+        }
+    }
+}
+
+pub fn button_system(
+    mut interaction_query: Query<
+        (
+            &Interaction,
+            &mut BackgroundColor,
+            &mut BorderColor,
+            Option<&ButtonStyle>,
+            &InteractiveState,
+        ),
+        (Changed<Interaction>, With<Button>),
+    >,
+) {
+    for (interaction, mut color, mut border_color, button_style, state) in &mut interaction_query {
+        if *state != InteractiveState::Disabled && *state != InteractiveState::Selected {
+            if let Some(button_style) = button_style {
+                match *interaction {
+                    Interaction::Hovered => {
+                        let colors: ButtonColor = ButtonColor::new(*button_style, InteractiveState::Hover);
+                        *color = colors.background.into();
+                        border_color.0 = colors.outline;
+                    }
+                    Interaction::Pressed => {
+                        let colors: ButtonColor = ButtonColor::new(*button_style, InteractiveState::Selected);
+                        *color = colors.background.into();
+                        border_color.0 = colors.outline;
+                    }
+                    Interaction::None => {
+                        let colors: ButtonColor = ButtonColor::new(*button_style, InteractiveState::Default);
+                        *color = colors.background.into();
+                        border_color.0 = colors.outline;
+                    }
+                }
             }
         }
     }

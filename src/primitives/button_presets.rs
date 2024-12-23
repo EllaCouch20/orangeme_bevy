@@ -9,34 +9,16 @@ use crate::primitives::button::{
     ButtonComponent, 
     ButtonSize, 
     InteractiveState, 
-    ButtonStyle, 
-    button_system,
+    ButtonStyle,
 };
 
 use crate::theme::icons::Icon;
 
-use crate::NavigateTo;
+use crate::Nav;
 
 // ===== Commonplace Button Usecases ===== //
 
-pub fn nav_button (label: &str, status: InteractiveState, icon: Icon) -> CustomButton {
-    CustomButton::new(
-        label,
-        Some(icon),
-        None,
-        ButtonStyle::Ghost,
-        ButtonWidth::Expand,
-        ButtonSize::Large,
-        status,
-        NavigateTo::Home,
-        JustifyContent::Start,
-        true,
-        false,
-    )
-}
-
-
-pub fn nav_button_pfp (mut label: &str, status: InteractiveState) -> CustomButton {
+pub fn nav_button_pfp (mut label: &str) -> CustomButton {
     label = if label.len() > 10 {
         if let Some(pos) = label.find(' ') {
             &label[..pos]
@@ -54,15 +36,26 @@ pub fn nav_button_pfp (mut label: &str, status: InteractiveState) -> CustomButto
         ButtonStyle::Ghost,
         ButtonWidth::Expand,
         ButtonSize::Large,
-        status,
-        NavigateTo::Home,
+        InteractiveState::Default,
         JustifyContent::Start,
-        true,
-        false,
     )
 }
 
-pub fn primary_default(label: &str, disabled: bool, state: InteractiveState, navigate_to: NavigateTo) -> CustomButton {
+
+pub fn nav_button (label: &str, icon: Icon) -> CustomButton {
+    CustomButton::new(
+        label,
+        Some(icon),
+        None,
+        ButtonStyle::Ghost,
+        ButtonWidth::Expand,
+        ButtonSize::Large,
+        InteractiveState::Default,
+        JustifyContent::Start,
+    )
+}
+
+pub fn primary_default(label: &str) -> CustomButton {
     CustomButton::new(
         label,
         None,
@@ -70,15 +63,25 @@ pub fn primary_default(label: &str, disabled: bool, state: InteractiveState, nav
         ButtonStyle::Primary,
         ButtonWidth::Expand,
         ButtonSize::Large,
-        state,
-        navigate_to,
+        InteractiveState::Default,
         JustifyContent::Center,
-        false,
-        disabled,
     )
 }
 
-pub fn secondary_default(label: &str, icon: Icon, navigate_to: NavigateTo) -> CustomButton {
+pub fn secondary_wide(label: &str) -> CustomButton {
+    CustomButton::new(
+        label,
+        None,
+        None,
+        ButtonStyle::Secondary,
+        ButtonWidth::Expand,
+        ButtonSize::Large,
+        InteractiveState::Default,
+        JustifyContent::Center,
+    )
+}
+
+pub fn secondary_default(label: &str, icon: Icon) -> CustomButton {
     CustomButton::new(
         label,
         Some(icon),
@@ -87,9 +90,6 @@ pub fn secondary_default(label: &str, icon: Icon, navigate_to: NavigateTo) -> Cu
         ButtonWidth::Hug,
         ButtonSize::Medium,
         InteractiveState::Default,
-        navigate_to,
         JustifyContent::Center,
-        false,
-        false,
     )
 }

@@ -1,7 +1,8 @@
 #![allow(unused)]
 use bevy::prelude::*;
 use bevy_ui::prelude::*;
-use crate::NavigateTo;
+use crate::Nav;
+use crate::InteractiveState;
 
 
 // ===== Icon Options ===== //
@@ -95,11 +96,10 @@ pub fn icon_button(
     parent: &mut ChildBuilder,
     asset_server: &Res<AssetServer>,
     icon: Icon,
-    navigate_to: NavigateTo
 ) {
     parent.spawn((
         Button,
-        navigate_to,
+        InteractiveState::Default,
         Icon::new(icon, asset_server),
         Node {
             height: Val::Px(32.0),

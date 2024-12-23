@@ -5,7 +5,7 @@ use super::despawn_screen;
 
 use crate::{
     menu_plugin,
-    NavigateTo
+    Nav
 };
 
 use crate::theme::{
@@ -15,7 +15,7 @@ use crate::theme::{
 };
 
 use crate::interface::{
-    header::{ header, Header },
+    header::Header,
     bumper::Bumper,
     interfaces::Interface
 };
@@ -25,24 +25,16 @@ use crate::primitives::{
     button::{
         InteractiveState,
         ButtonComponent,
-        button_system,
     },
 };
 
 use crate::primitives::button_presets::{primary_default, secondary_default};
+use crate::components::tip_button::Tip;
 
 use crate::components::{
     text_input::text_input,
     navigator::sidebar_navigator,
     tip_button::tip_buttons,
-};
-
-use bevy_simple_text_input::{
-    TextInput, 
-    TextInputTextFont,
-    TextInputTextColor,
-    TextInputPlaceholder,
-    TextInputInactive,
 };
 
 #[derive(Component)]
@@ -56,12 +48,7 @@ pub fn address_setup(
 ) {
     let bumper = Bumper::new();
     let interface = Interface::new();
-    
-    let paste = secondary_default("Paste Clipboard", Icon::Paste, NavigateTo::Home);
-    let scan = secondary_default("Scan QR Code", Icon::QrCode, NavigateTo::Home);
-    let contact = secondary_default("Select Contact", Icon::Profile, NavigateTo::Home);
-
-    let next = primary_default("Continue", true, InteractiveState::Disabled, NavigateTo::Amount);
+    let header = Header::new();
 
     commands.spawn((
         interface.node,
@@ -71,14 +58,20 @@ pub fn address_setup(
         sidebar_navigator(parent, &fonts, &asset_server);
 
         parent.spawn(interface.page_node).with_children(|parent| {
-            header(parent, &fonts, &asset_server, &colors, Header::Stack, "Bitcoin address");
+            header.stack_header(parent, &fonts, &asset_server, &colors, Some(Icon::Left), "Bitcoin address", Nav::Home);
 
             parent.spawn((interface.content, Interaction::None)).with_children(|parent| { 
                 text_input(parent, &fonts, "Bitcoin address...");
-                tip_buttons(parent, &asset_server, &fonts, vec![paste, scan, contact]);
+                tip_buttons(parent, &asset_server, &colors, &fonts, vec![
+                    (secondary_default("Paste Clipboard", Icon::Paste), Tip::PasteClipboard), 
+                    (secondary_default("Scan QR Code", Icon::QrCode), Tip::ScanQRCode),
+                    (secondary_default("Select Contact", Icon::Profile), Tip::SelectContact),
+                ]);
             });
 
-            bumper.button_bumper(parent, &fonts, &asset_server, vec![next]);
+            bumper.button_bumper(parent, &fonts, &asset_server, vec![
+                (primary_default("Continue"), Nav::Amount)
+            ]);
         });
     });
 }
