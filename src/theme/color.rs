@@ -9,6 +9,7 @@ use crate::primitives::button::{InteractiveState, ButtonStyle};
 
 /* -------- DISPLAY -------- */
 
+#[derive(Resource)]
 pub struct Display { 
     pub bg_primary: Color, 
     pub bg_secondary: Color,

@@ -29,6 +29,7 @@ use crate::primitives::{
 };
 
 use crate::primitives::button_presets::{primary_default, secondary_default};
+use crate::components::radio::radio_button;
 
 use crate::components::{
     text_input::text_input,
@@ -45,11 +46,15 @@ use bevy_simple_text_input::{
 };
 
 #[derive(Component)]
-pub struct OnAddressScreen;
+pub struct OnSpeedScreen;
 
-pub fn address_setup(mut commands: Commands, asset_server: Res<AssetServer>, fonts: Res<FontResources>) {
+pub fn speed_setup(
+    mut commands: Commands, 
+    asset_server: Res<AssetServer>, 
+    fonts: Res<FontResources>,
+    colors: Res<Display>,
+) {
 
-    let colors = Display::new();
     let bumper = Bumper::new();
     let interface = Interface::new();
 
@@ -57,20 +62,21 @@ pub fn address_setup(mut commands: Commands, asset_server: Res<AssetServer>, fon
 
     commands.spawn((
         interface.node,
-        OnAddressScreen,
+        OnSpeedScreen,
     ))
     .with_children(|parent| {
         sidebar_navigator(parent, &fonts, &asset_server);
 
         parent.spawn(interface.page_node).with_children(|parent| {
-            header(parent, &fonts, &asset_server, Header::Stack, "Bitcoin address");
+            header(parent, &fonts, &asset_server, &colors, Header::Stack, "Bitcoin address");
 
             parent.spawn((interface.content, Interaction::None)).with_children(|parent| { 
-                radio_button(parent, &fonts, &asset_server, "Standard", "Arrives in ~2 hours\n$0.18 bitcoin network fee", 0);
-                radio_button(parent, &fonts, &asset_server, "Priority", "Arrives in ~30 minutes\n$0.35 bitcoin network fee", 0);
+                radio_button(parent, &fonts, &colors, &asset_server, "Standard", "Arrives in ~2 hours\n$0.18 bitcoin network fee", 0);
+                radio_button(parent, &fonts, &colors, &asset_server, "Priority", "Arrives in ~30 minutes\n$0.35 bitcoin network fee", 0);
             });
             
             bumper.button_bumper(parent, &fonts, &asset_server, vec![next]);
         });
     });
 }
+

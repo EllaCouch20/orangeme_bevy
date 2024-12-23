@@ -61,72 +61,25 @@ pub fn text_input(
 
 // ===== Text Input Visual Handler ===== //
 
-pub fn focus(
-    mut interaction_query: Query<
-        (Entity, &Interaction), 
-        (Changed<Interaction>, With<TextInputInactive>),
-    >,
-    mut param_set: ParamSet<(
-        Query<(
-            Entity, 
-            &mut TextInputInactive, 
-            &mut BorderColor,
-            &TextInputValue,
-        )>,
-        Query<(
-            &mut CustomButton, 
-            &SetState,
-            Option<&ButtonStyle>,
-            &mut BackgroundColor,
-            &mut BorderColor,
-            &Children,
-        ), With<Button>>,
+pub fn text_input_visuals_system(
+    mut interaction_query: Query<(Entity, &Interaction), (Changed<Interaction>, With<TextInputInactive>)>,
+    mut text_input_query: Query<(
+        Entity, 
+        &mut TextInputInactive, 
+        &mut BorderColor,
+        &TextInputValue,
     )>,
-    mut text_query: Query<(&mut TextColor, &Parent), With<Text>>,
+    colors: Res<Display>,
 ) {
-    let colors = Display::new();
-
-    {
-        let mut text_input_query = param_set.p0();
-        for (interaction_entity, interaction) in interaction_query.iter_mut() {
-            if *interaction == Interaction::Pressed {
-                for (entity, mut inactive, mut input_border_color, _input_value) in text_input_query.iter_mut() {
-                    if entity == interaction_entity {
-                        inactive.0 = false;
-                        *input_border_color = colors.outline_primary.into();
-                    } else {
-                        inactive.0 = true;
-                        *input_border_color = colors.outline_secondary.into();
-                    }
-                }
-            }
-        }
-    }
-
-    let is_any_input_empty = {
-        let text_input_query = param_set.p0();
-        text_input_query.iter().any(|(_, _, _, input_value)| input_value.0.is_empty())
-    };
-
-    {
-        let mut button_query = param_set.p1();
-        for (mut data, set_state, button_style, mut color, mut border_color, children) in button_query.iter_mut() {
-            if *set_state == SetState::Disablable {
-                data.state = if is_any_input_empty {
-                    InteractiveState::Disabled
+    for (interaction_entity, interaction) in interaction_query.iter_mut() {
+        if *interaction == Interaction::Pressed {
+            for (entity, mut inactive, mut input_border_color, _input_value) in text_input_query.iter_mut() {
+                if entity == interaction_entity {
+                    inactive.0 = false;
+                    *input_border_color = colors.outline_primary.into();
                 } else {
-                    InteractiveState::Default
-                };
-
-                if let Some(button_style) = button_style {
-                    let button_colors: ButtonColor = ButtonColor::new(*button_style, data.state);
-                    *color = button_colors.background.into();
-                    *border_color = button_colors.outline.into();
-                    for child in children.iter() {
-                        if let Ok((mut text_color, _parent)) = text_query.get_mut(*child) {
-                            *text_color = button_colors.label.into();
-                        }
-                    }
+                    inactive.0 = true;
+                    *input_border_color = colors.outline_secondary.into();
                 }
             }
         }

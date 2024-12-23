@@ -1,4 +1,5 @@
 use bevy::{prelude::*, ui::FocusPolicy};
+use bevy_simple_text_input::TextInputValue;
 
 use super::despawn_screen;
 
@@ -47,14 +48,17 @@ use bevy_simple_text_input::{
 #[derive(Component)]
 pub struct OnAddressScreen;
 
-pub fn address_setup(mut commands: Commands, asset_server: Res<AssetServer>, fonts: Res<FontResources>) {
-
-    let colors = Display::new();
+pub fn address_setup(
+    mut commands: Commands, 
+    asset_server: Res<AssetServer>, 
+    fonts: Res<FontResources>,
+    colors: Res<Display>,
+) {
     let bumper = Bumper::new();
     let interface = Interface::new();
     
     let paste = secondary_default("Paste Clipboard", Icon::Paste, NavigateTo::Home);
-    let scan = secondary_default("Scan QR Code", Icon::Scan, NavigateTo::Home);
+    let scan = secondary_default("Scan QR Code", Icon::QrCode, NavigateTo::Home);
     let contact = secondary_default("Select Contact", Icon::Profile, NavigateTo::Home);
 
     let next = primary_default("Continue", true, InteractiveState::Disabled, NavigateTo::Amount);
@@ -67,7 +71,7 @@ pub fn address_setup(mut commands: Commands, asset_server: Res<AssetServer>, fon
         sidebar_navigator(parent, &fonts, &asset_server);
 
         parent.spawn(interface.page_node).with_children(|parent| {
-            header(parent, &fonts, &asset_server, Header::Stack, "Bitcoin address");
+            header(parent, &fonts, &asset_server, &colors, Header::Stack, "Bitcoin address");
 
             parent.spawn((interface.content, Interaction::None)).with_children(|parent| { 
                 text_input(parent, &fonts, "Bitcoin address...");

@@ -1,5 +1,6 @@
 use bevy::prelude::*;
 use crate::primitives::profile_photo::profile_photo;
+use crate::utils::text;
 use crate::NavigateTo;
 use crate::theme::{ color::Display, fonts::FontResources, icons::{Icon, icon_button} };
 
@@ -14,10 +15,10 @@ pub fn header(
     parent: &mut ChildBuilder,
     fonts: &Res<FontResources>,
     asset_server: &Res<AssetServer>,
+    colors: &Res<Display>,
     header_type: Header,
     title: &str,
 ) {
-    let colors = Display::new();
 
     let header_node = Node {
         width: Val::Percent(100.0),
@@ -36,14 +37,14 @@ pub fn header(
             parent.spawn(header_node).with_children(|parent| { 
                 header_icon(None, parent, asset_server);
                 // profile_photo(parent, fonts, asset_server, "profile_photo.png");  // Mobile Only
-                header_title(title, fonts.size.h3, parent, fonts);
+                header_title(title, fonts.size.h3, colors, parent, fonts);
                 header_icon(None, parent, asset_server);
             });
         },
         Header::Stack => {
             parent.spawn(header_node).with_children(|parent| { 
                 header_icon(Some(Icon::Left), parent, asset_server);
-                header_title(title, fonts.size.h4, parent, fonts);
+                header_title(title, fonts.size.h4, colors, parent, fonts);
                 header_icon(None, parent, asset_server);
             });
         }
@@ -53,21 +54,15 @@ pub fn header(
 pub fn header_title(
     title: &str, 
     font_size: f32, 
+    colors: &Res<Display>,
     parent: &mut ChildBuilder,
     fonts: &Res<FontResources>,
 ){
-    let colors = Display::new();
     let font = fonts.style.heading.clone();
 
-    parent.spawn((
-        Text::new(title),
-        TextFont {
-            font,
-            font_size,
-            ..default()
-        },
-        TextColor(colors.text_heading),
-    ));
+    parent.spawn(
+        text(title, font, font_size, colors.text_heading),
+    );
 }
 
 pub fn header_icon(

@@ -37,9 +37,13 @@ use crate::components::{
 #[derive(Component)]
 pub struct OnHomeScreen;
 
-pub fn home_setup(mut commands: Commands, asset_server: Res<AssetServer>, fonts: Res<FontResources>) {
+pub fn home_setup(
+    mut commands: Commands, 
+    asset_server: Res<AssetServer>, 
+    fonts: Res<FontResources>,
+    colors: Res<Display>,
+) {
 
-    let colors = Display::new();
     let bumper = Bumper::new();
     let interface = Interface::new();
     
@@ -54,7 +58,7 @@ pub fn home_setup(mut commands: Commands, asset_server: Res<AssetServer>, fonts:
         sidebar_navigator(parent, &fonts, &asset_server);
 
         parent.spawn(interface.page_node).with_children(|parent| {
-            header(parent, &fonts, &asset_server, Header::Home, "Wallet");
+            header(parent, &fonts, &asset_server, &colors, Header::Home, "Wallet");
 
             parent.spawn(interface.content_centered).with_children(|parent| {
                 balance_display(parent, &fonts, "$0.00", "0.00000000 BTC");

@@ -7,18 +7,20 @@ use std::fmt::Write;
 
 use crate::theme::fonts::FontResources;
 use crate::theme::color::Display;
-use crate::utils::{EXPAND, cal_font_size, usd_to_btc};
+use crate::utils::{EXPAND, text};
 use crate::StateData;
-
+use crate::theme::icons::Icon;
 use crate::components::amount_display::{AmountDisplayUsd, AmountDisplayZeros, AmountDisplayHelper};
 
 // ===== System Updating Display ===== //
 
+#[derive(Component)]
 pub struct KeypadButton;
 
 pub fn numeric_keypad(
     parent: &mut ChildBuilder,
     fonts: &Res<FontResources>,
+    asset_server: &Res<AssetServer>,
     key_str: Option<&str>,
     key_icon: Option<Icon>,
 ){
@@ -44,33 +46,33 @@ pub fn numeric_keypad(
         row_gap: Val::Px(16.0), 
         ..default()
     }).with_children(|parent| { 
-        parent.spawn(row_node).with_children(|parent| {
-            keypad_button(parent, &fonts, Some("1"), None);
-            keypad_button(parent, &fonts, Some("2"), None);
-            keypad_button(parent, &fonts, Some("3"), None);
+        parent.spawn(row_node.clone()).with_children(|parent| {
+            keypad_button(parent, &fonts, &asset_server, Some("1"), None);
+            keypad_button(parent, &fonts, &asset_server, Some("2"), None);
+            keypad_button(parent, &fonts, &asset_server, Some("3"), None);
         });
-        parent.spawn(row_node).with_children(|parent| {
-            keypad_button(parent, &fonts, Some("4"), None);
-            keypad_button(parent, &fonts, Some("5"), None);
-            keypad_button(parent, &fonts, Some("6"), None);
+        parent.spawn(row_node.clone()).with_children(|parent| {
+            keypad_button(parent, &fonts, &asset_server, Some("4"), None);
+            keypad_button(parent, &fonts, &asset_server, Some("5"), None);
+            keypad_button(parent, &fonts, &asset_server, Some("6"), None);
         });
-        parent.spawn(row_node).with_children(|parent| {
-            keypad_button(parent, &fonts, Some("7"), None);
-            keypad_button(parent, &fonts, Some("8"), None);
-            keypad_button(parent, &fonts, Some("9"), None);
+        parent.spawn(row_node.clone()).with_children(|parent| {
+            keypad_button(parent, &fonts, &asset_server, Some("7"), None);
+            keypad_button(parent, &fonts, &asset_server, Some("8"), None);
+            keypad_button(parent, &fonts, &asset_server, Some("9"), None);
         });
-        parent.spawn(row_node).with_children(|parent| {
-            keypad_button(parent, &fonts, Some("."), None);
-            keypad_button(parent, &fonts, Some("0"), None);
-            keypad_button(parent, &fonts, None, Some(Icon::Back));
+        parent.spawn(row_node.clone()).with_children(|parent| {
+            keypad_button(parent, &fonts, &asset_server, Some("."), None);
+            keypad_button(parent, &fonts, &asset_server, Some("0"), None);
+            keypad_button(parent, &fonts, &asset_server, None, Some(Icon::Back));
         });
     });  
 }
 
-
 pub fn keypad_button(
     parent: &mut ChildBuilder,
     fonts: &Res<FontResources>,
+    asset_server: &Res<AssetServer>,
     key_str: Option<&str>,
     key_icon: Option<Icon>,
 ){
@@ -79,15 +81,18 @@ pub fn keypad_button(
 
     let colors = Display::new();
     
-    parent.spawn(Node {
-        width: EXPAND,
-        height: Val::Px(48.0),
-        justify_content: JustifyContent::Center,
-        align_items: AlignItems::Center,
-        row_gap: Val::Px(8.0), 
-        ..default()
-    }, Button, KeypadButton)
-    .with_children(|parent| { 
+    parent.spawn((
+        Node {
+            width: EXPAND,
+            height: Val::Px(48.0),
+            justify_content: JustifyContent::Center,
+            align_items: AlignItems::Center,
+            row_gap: Val::Px(8.0), 
+            ..default()
+        }, 
+        KeypadButton,
+        Button,
+    )).with_children(|parent| { 
 
         // ===== Button Content ===== //
 
@@ -101,15 +106,9 @@ pub fn keypad_button(
                 },
             ));
         } else if let Some(key) = key_str {
-            parent.spawn((
-                Text::new(key),
-                TextFont {
-                    font,
-                    font_size,
-                    ..default()
-                },
-                TextColor(colors.text_header),
-            ));
+            parent.spawn(
+                text(key, font, font_size, colors.text_heading),
+            );
         }  
     });  
 }

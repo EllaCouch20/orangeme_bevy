@@ -46,12 +46,12 @@ pub fn amount_setup(
     asset_server: Res<AssetServer>,
     fonts: Res<FontResources>,
     state_data: Res<StateData>,
+    colors: Res<Display>,
 ) {
-    let colors = Display::new();
     let bumper = Bumper::new();
     let interface = Interface::new();
 
-    let next = primary_default("Continue", false, InteractiveState::Default, NavigateTo::Home);
+    let next = primary_default("Continue", false, InteractiveState::Default, NavigateTo::Speed);
 
     commands.spawn((
         interface.node,
@@ -61,9 +61,9 @@ pub fn amount_setup(
         sidebar_navigator(parent, &fonts, &asset_server);
 
         parent.spawn(interface.page_node).with_children(|parent| {
-            header(parent, &fonts, &asset_server, Header::Stack, "Send bitcoin");
+            header(parent, &fonts, &asset_server, &colors, Header::Stack, "Send bitcoin");
             parent.spawn(interface.content).with_children(|parent| {
-                amount_display(parent, &fonts, &format!("${}", &state_data.usd), &state_data.zeros, &state_data.helper);
+                amount_display(parent, &fonts, &colors, None, &state_data.zeros, &state_data.helper);
             });
             bumper.button_bumper(parent, &fonts, &asset_server, vec![next]);
         });

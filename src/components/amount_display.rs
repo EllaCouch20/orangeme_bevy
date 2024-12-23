@@ -7,7 +7,7 @@ use std::fmt::Write;
 
 use crate::theme::fonts::FontResources;
 use crate::theme::color::Display;
-use crate::utils::{EXPAND, cal_font_size, usd_to_btc};
+use crate::utils::{EXPAND, cal_font_size, usd_to_btc, text};
 use crate::StateData;
 
 #[derive(Component)]
@@ -22,9 +22,10 @@ pub struct AmountDisplayHelper;
 pub fn amount_display(
     parent: &mut ChildBuilder,
     fonts: &Res<FontResources>,
-    usd: &str,
+    colors: &Res<Display>,
+    error: Option<&str>,
     zeros: &str,
-    helper: &str,
+    usd: &str,
 ){
     let usd_font = fonts.style.label.clone();
     let usd_font_size = cal_font_size(fonts, usd);
@@ -32,7 +33,11 @@ pub fn amount_display(
     let btc_font = fonts.style.text.clone();
     let btc_font_size = fonts.size.lg;
 
-    let colors = Display::new();
+    let txt = if let Some(error) = error {
+        error
+    } else {
+        &usd_to_btc(25.0)
+    };    
     
     parent.spawn(Node {
         width: EXPAND,
@@ -42,46 +47,26 @@ pub fn amount_display(
         flex_direction: FlexDirection::Column,
         row_gap: Val::Px(8.0), 
         ..default()
-    })
-    .with_children(|child| {
+    }).with_children(|child| {
         child.spawn(Node {
             justify_content: JustifyContent::Center,
             align_items: AlignItems::Center,
             flex_direction: FlexDirection::Row,
             ..default()
         })
-        .with_children(|child| {
+        .with_children(|child| { 
             child.spawn((
-                Text::new(usd),
-                TextFont {
-                    font: usd_font.clone(),
-                    font_size: usd_font_size,
-                    ..default()
-                },
-                TextColor(colors.text_heading),
+                text(usd, usd_font.clone(), usd_font_size, colors.text_heading),
                 AmountDisplayUsd
-            ));  
+            ));
             child.spawn((
-                Text::new(zeros),
-                TextFont {
-                    font: usd_font,
-                    font_size: usd_font_size,
-                    ..default()
-                },
-                TextColor(colors.text_secondary),
+                text(zeros, usd_font, usd_font_size, colors.text_secondary),
                 AmountDisplayZeros
-            )); 
+            ));
         }); 
-
         child.spawn((
-            Text::new(helper),
-            TextFont {
-                font: btc_font,
-                font_size: btc_font_size,
-                ..default()
-            },
-            TextColor(colors.text_secondary),
+            text(txt, btc_font, btc_font_size, colors.text_secondary),
             AmountDisplayHelper
-        ));  
+        )); 
     });  
 }

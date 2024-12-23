@@ -2,7 +2,7 @@ use bevy::prelude::*;
 use crate::theme::fonts::FontResources;
 use crate::theme::color::Display;
 use bevy_ui::prelude::*;
-use crate::utils::EXPAND;
+use crate::utils::{EXPAND, text};
 
 
 // ===== Home Balance Widget ===== //
@@ -31,19 +31,11 @@ pub fn balance_display(
         ..default()
     })
     .with_children(|child| {
-        child.spawn((
-            Text::new(usd),
-            TextFont { font, font_size, ..default() },
-            TextColor(colors.text_heading),
-        ));  
-        child.spawn((
-            Text::new(btc),
-            TextFont {
-                font: btc_font,
-                font_size: btc_font_size,
-                ..default()
-            },
-            TextColor(colors.text_secondary),
-        ));  
+        child.spawn(
+            text(usd, font, font_size, colors.text_heading),
+        );
+        child.spawn(
+            text(btc, btc_font, btc_font_size, colors.text_secondary),
+        ); 
     });  
 }

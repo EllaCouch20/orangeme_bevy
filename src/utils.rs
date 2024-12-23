@@ -29,3 +29,20 @@ pub fn spacer (parent: &mut ChildBuilder) {
 pub fn usd_to_btc(usd: f32) -> String {
    "0.00001234 BTC".to_string()
 }
+
+pub fn text(
+    text: &str,
+    font: Handle<Font>,
+    font_size: f32,
+    color: Color,
+) -> (Text, TextFont, TextColor) {
+    (
+        Text::new(text),
+        TextFont {
+            font,
+            font_size,
+            ..Default::default()
+        },
+        TextColor(color),
+    )
+}

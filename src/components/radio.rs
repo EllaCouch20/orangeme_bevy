@@ -7,32 +7,33 @@ use std::fmt::Write;
 
 use crate::theme::fonts::FontResources;
 use crate::theme::color::Display;
-use crate::utils::{EXPAND, cal_font_size, usd_to_btc};
+use crate::utils::{EXPAND, text};
+use crate::theme::icons::Icon;
 use crate::StateData;
 
 use crate::components::amount_display::{AmountDisplayUsd, AmountDisplayZeros, AmountDisplayHelper};
 
 // ===== System Updating Display ===== //
 
+#[derive(Component)]
 pub struct RadioButton;
 
 pub fn radio_button(
     parent: &mut ChildBuilder,
     fonts: &Res<FontResources>,
-    asset_server: &Res<AssetServer>
+    colors: &Res<Display>,
+    asset_server: &Res<AssetServer>,
     title: &str,
     subtitle: &str,
     index: u8,
 ){
-    let title_font = fonts.style.header.clone();
+    let title_font = fonts.style.heading.clone();
     let title_size = fonts.size.h5;
 
     let sub_font = fonts.style.text.clone();
     let sub_size = fonts.size.xs;
 
-    let colors = Display::new();
-
-    parent.spawn(
+    parent.spawn((
         Node {
             width: EXPAND,
             justify_content: JustifyContent::Center,
@@ -48,14 +49,15 @@ pub fn radio_button(
         }, 
         RadioButton,
         Button,
-    ).with_children(|parent| { 
-        parent.spawn(Node {
-            width: Val::Px(32.0),
-            height: Val::Px(32.0),
-            ..default()
-        }).with_child(|parent| {
-            Icon::new(Icon::Radio, &asset_server)
-        });
+    )).with_children(|parent| { 
+        parent.spawn((
+            Icon::new(Icon::Radio, asset_server),
+            Node {
+                height: Val::Px(32.0),
+                width: Val::Px(32.0),
+                ..default()
+            },
+        ));
         parent.spawn(Node {
             width: EXPAND,
             height: EXPAND,
@@ -64,25 +66,13 @@ pub fn radio_button(
             flex_direction: FlexDirection::Column,
             row_gap: Val::Px(4.0), 
             ..default()
-        }).with_children(|child| {
-            child.spawn((
-                Text::new(usd),
-                TextFont {
-                    font: title_font,
-                    font_size: title_size,
-                    ..default()
-                },
-                TextColor(colors.text_heading),
-            ));  
-            child.spawn((
-                Text::new(btc),
-                TextFont {
-                    font: sub_font,
-                    font_size: sub_size,
-                    ..default()
-                },
-                TextColor(colors.text_secondary),
-            ));  
+        }).with_children(|parent| {
+            parent.spawn(
+                text(title, title_font, title_size, colors.text_heading),
+            );
+            parent.spawn(
+                text(subtitle, sub_font, sub_size, colors.text_secondary),
+            );
         });  
     });  
 }
