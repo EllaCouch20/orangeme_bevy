@@ -30,6 +30,8 @@ use crate::components::{
     navigator::sidebar_navigator,
 };
 
+use crate::PageState;
+
 #[derive(Component)]
 pub struct OnHomeScreen;
 
@@ -38,6 +40,7 @@ pub fn home_setup(
     asset_server: Res<AssetServer>, 
     fonts: Res<FontResources>,
     colors: Res<Display>,
+    mut menu_state: ResMut<NextState<PageState>>,
 ) {
 
     let bumper = Bumper::new();
@@ -52,7 +55,7 @@ pub fn home_setup(
         OnHomeScreen,
     ))
     .with_children(|parent| {
-        sidebar_navigator(parent, &fonts, &asset_server);
+        sidebar_navigator(parent, &fonts, &asset_server, menu_state);
 
         parent.spawn(interface.page_node).with_children(|parent| {
             header.home_header(parent, &fonts, &asset_server, &colors, "Wallet");

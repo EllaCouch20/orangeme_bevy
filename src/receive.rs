@@ -47,6 +47,7 @@ use crate::components::{
 };
 
 use crate::utils::text;
+use crate::PageState;
 
 #[derive(Component)]
 pub struct OnReceiveScreen;
@@ -56,6 +57,7 @@ pub fn receive_setup(
     asset_server: Res<AssetServer>, 
     fonts: Res<FontResources>,
     colors: Res<Display>,
+    mut menu_state: ResMut<NextState<PageState>>,
 ) {
     let bumper = Bumper::new();
     let interface = Interface::new();
@@ -70,7 +72,7 @@ pub fn receive_setup(
         OnReceiveScreen,
     ))
     .with_children(|parent| {
-        sidebar_navigator(parent, &fonts, &asset_server);
+        sidebar_navigator(parent, &fonts, &asset_server, menu_state);
 
         parent.spawn(interface.page_node).with_children(|parent| {
             header.stack_header(parent, &fonts, &asset_server, &colors, Some(Icon::Left), "Receive bitcoin", Nav::Home);

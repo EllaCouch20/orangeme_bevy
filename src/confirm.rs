@@ -36,6 +36,7 @@ use crate::components::{
     navigator::sidebar_navigator,
 };
 
+use crate::PageState;
 
 #[derive(Component)]
 pub struct OnConfirmScreen;
@@ -45,6 +46,7 @@ pub fn confirm_setup(
     asset_server: Res<AssetServer>, 
     fonts: Res<FontResources>,
     colors: Res<Display>,
+    mut menu_state: ResMut<NextState<PageState>>,
 ) {
 
     let bumper = Bumper::new();
@@ -55,7 +57,7 @@ pub fn confirm_setup(
         interface.node,
         OnConfirmScreen,
     )).with_children(|parent| {
-        sidebar_navigator(parent, &fonts, &asset_server);
+        sidebar_navigator(parent, &fonts, &asset_server, menu_state);
 
         parent.spawn(interface.page_node).with_children(|parent| {
             header.stack_header(parent, &fonts, &asset_server, &colors, Some(Icon::Left), "Confirm send", Nav::Amount);
@@ -88,7 +90,7 @@ pub fn confirm_address(
 
     let edit_address = (secondary_default("Address", Icon::Edit), Nav::Address);
 
-    parent.spawn ((
+    parent.spawn(
         Node {
             width: EXPAND,
             justify_content: JustifyContent::Start,
@@ -97,8 +99,16 @@ pub fn confirm_address(
             column_gap: Val::Px(16.0),
             ..default()
         }
-    )).with_children(|parent| {
-        circle(parent, &colors, h6, h_font.clone(), "1");
+    ).with_children(|parent| {
+        parent.spawn((
+            Node {
+                width: Val::Px(32.0),
+                height: Val::Px(32.0),
+                justify_content: JustifyContent::Center,
+                align_items: AlignItems::Center,
+                ..default()
+            },
+        )).with_children(|parent| {circle(parent, colors, h6, h_font.clone(), "1")});
         parent.spawn((
             Node {
                 width: EXPAND,
@@ -136,17 +146,23 @@ pub fn confirm_amount(
     let edit_amount = (secondary_default("Amount", Icon::Edit), Nav::Amount);
     let edit_speed = (secondary_default("Speed", Icon::Edit), Nav::Speed);
 
-    parent.spawn ((
-        Node {
-            width: EXPAND,
-            justify_content: JustifyContent::Start,
-            align_items: AlignItems::Start,
-            flex_direction: FlexDirection::Row,
-            column_gap: Val::Px(16.0),
-            ..default()
-        }
-    )).with_children(|parent| {
-        circle(parent, &colors, h6, h_font.clone(), "2");
+    parent.spawn(Node {
+        width: EXPAND,
+        justify_content: JustifyContent::Start,
+        align_items: AlignItems::Start,
+        flex_direction: FlexDirection::Row,
+        column_gap: Val::Px(16.0),
+        ..default()
+    }).with_children(|parent| {
+        parent.spawn((
+            Node {
+                width: Val::Px(32.0),
+                height: Val::Px(32.0),
+                justify_content: JustifyContent::Center,
+                align_items: AlignItems::Center,
+                ..default()
+            },
+        )).with_children(|parent| {circle(parent, colors, h6, h_font.clone(), "2")});
         parent.spawn((
             Node {
                 width: EXPAND,
@@ -163,10 +179,10 @@ pub fn confirm_amount(
                     flex_direction: FlexDirection::Column,
                     ..default()
             }).with_children(|parent|{
-                tabular("Date", "10/05/2025", t_font.clone(), sm, &colors, parent);
-                tabular("Time", "8:45 PM", t_font.clone(), sm, &colors, parent);
-                tabular("Sent to Address", "1A1zP1eP5...fNa", t_font.clone(), sm, &colors, parent);
-                tabular("Amount Sent", "0.00001234 BTC", t_font.clone(), sm, &colors, parent);
+                tabular("Date", "10/05/2025", t_font.clone(), sm, colors, parent);
+                tabular("Time", "8:45 PM", t_font.clone(), sm, colors, parent);
+                tabular("Sent to Address", "1A1zP1eP5...fNa", t_font.clone(), sm, colors, parent);
+                tabular("Amount Sent", "0.00001234 BTC", t_font.clone(), sm, colors, parent);
             });
             parent.spawn ((
                 Node {
@@ -197,20 +213,18 @@ pub fn tabular(
     colors: &Res<Display>,
     parent: &mut ChildBuilder,
 ){
-    parent.spawn ((
-        Node {
-            width: EXPAND,
-            justify_content: JustifyContent::SpaceBetween,
-            align_items: AlignItems::Start,
-            flex_direction: FlexDirection::Row,
-            padding: UiRect {
-                top: Val::Px(4.0),
-                bottom: Val::Px(4.0),
-                ..default()
-            },
+    parent.spawn(Node {
+        width: EXPAND,
+        justify_content: JustifyContent::SpaceBetween,
+        align_items: AlignItems::Start,
+        flex_direction: FlexDirection::Row,
+        padding: UiRect {
+            top: Val::Px(4.0),
+            bottom: Val::Px(4.0),
             ..default()
-        }
-    )).with_children(|parent| {
+        },
+        ..default()
+    }).with_children(|parent| {
         parent.spawn(text(title, font.clone(), size, colors.text_primary));
         parent.spawn(text(content, font, size, colors.text_primary));
     }); 
@@ -232,7 +246,7 @@ fn circle(
             ..default()
         },
         BackgroundColor(colors.bg_secondary),
-        BorderRadius::all(Val::Px(16.0)),
+        BorderRadius::MAX,
     )).with_children(|parent| {
         parent.spawn((
             Node {

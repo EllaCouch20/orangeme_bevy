@@ -15,12 +15,24 @@ use crate::{
     InteractiveState,
 };
 
+use crate::ButtonColor;
+use crate::ButtonStyle;
+use crate::PageState;
+
 // ===== Desktop Sidebar Navigation ===== //
+
+#[derive(Component, Debug)]
+pub struct BitcoinNavigationButton;
+#[derive(Component, Debug)]
+pub struct MessagesNavigationButton;
+#[derive(Component, Debug)]
+pub struct ProfileNavigationButton;
 
 pub fn sidebar_navigator (
     parent: &mut ChildBuilder,
     fonts: &Res<FontResources>,
     asset_server: &Res<AssetServer>, 
+    mut menu_state: ResMut<NextState<PageState>>,
 ) {
 
     let font = fonts.style.label.clone();
@@ -73,7 +85,7 @@ pub fn sidebar_navigator (
             ));
 
             // ===== Button List ===== //
-
+            
             child.spawn(Node {
                 width: EXPAND,
                 justify_content: JustifyContent::Center,
@@ -82,19 +94,133 @@ pub fn sidebar_navigator (
                 row_gap: Val::Px(8.0), 
                 ..default()
             }).with_children(|child| {
-                ButtonComponent::spawn_button(child, asset_server, fonts, wallet);
-                ButtonComponent::spawn_button(child, asset_server, fonts, message);
+                child.spawn((Node {
+                    width: EXPAND,
+                    justify_content: JustifyContent::Center,
+                    align_items: AlignItems::Center,
+                    ..default()
+                }, BitcoinNavigationButton)).with_children(|child| {
+                    ButtonComponent::spawn_button(child, asset_server, fonts, wallet);
+                });
+                child.spawn((Node {
+                    width: EXPAND,
+                    justify_content: JustifyContent::Center,
+                    align_items: AlignItems::Center,
+                    ..default()
+                }, MessagesNavigationButton)).with_children(|child| {
+                    ButtonComponent::spawn_button(child, asset_server, fonts, message);
+                });
             });
 
             spacer(child);
 
             // ===== Profile Button ===== //
             
-            child.spawn(Node { 
-                width: EXPAND, ..default()
-            }).with_children(|child| {
+            child.spawn((Node {
+                width: EXPAND,
+                justify_content: JustifyContent::Center,
+                align_items: AlignItems::Center,
+                ..default()
+            }, ProfileNavigationButton)).with_children(|child| {
                 ButtonComponent::spawn_button(child, asset_server, fonts, profile);
             });
         });
     });
+}
+
+
+pub fn navigation_system(
+    mut interaction_query: Query<
+        (
+            &Interaction,
+            &Parent,
+            &mut BackgroundColor,
+            &mut BorderColor,
+            Option<&ButtonStyle>,
+            &mut InteractiveState,
+        ),
+        (With<Button>),
+    >,
+    nav_bit_query: Query<&BitcoinNavigationButton>,
+    nav_mes_query: Query<&MessagesNavigationButton>,
+    nav_pro_query: Query<&ProfileNavigationButton>,
+    mut menu_state: ResMut<NextState<PageState>>,
+) {
+    let mut selected_button = None;
+
+    for (interaction, parent, mut color, mut border_color, button_style, mut state) in &mut interaction_query {
+        if *interaction == Interaction::Pressed {
+            selected_button = Some(parent.get());
+
+            if let Ok(nav) = nav_bit_query.get(parent.get()) {
+                menu_state.set(PageState::Home);
+            }
+            if let Ok(nav) = nav_mes_query.get(parent.get()) {
+                menu_state.set(PageState::Home);
+            }
+            if let Ok(nav) = nav_pro_query.get(parent.get()) {
+                menu_state.set(PageState::Home);
+            }
+
+            if let Some(button_style) = button_style {
+                let colors: ButtonColor = ButtonColor::new(*button_style, InteractiveState::Selected);
+                *color = colors.background.into();
+                border_color.0 = colors.outline;
+            }
+
+            *state = InteractiveState::Selected;
+        }
+    }
+
+    if let Some(selected_parent) = selected_button {
+        for (interaction, parent, mut color, mut border_color, button_style, mut state) in &mut interaction_query {
+            if parent.get() != selected_parent {
+                if let Some(button_style) = button_style {
+                    let colors: ButtonColor = ButtonColor::new(*button_style, InteractiveState::Default);
+                    *color = colors.background.into();
+                    border_color.0 = colors.outline;
+                }
+
+                *state = InteractiveState::Default;
+            }
+        }
+    }
+}
+
+
+pub fn button_system(
+    mut interaction_query: Query<
+        (
+            &Interaction,
+            &mut BackgroundColor,
+            &mut BorderColor,
+            Option<&ButtonStyle>,
+            &InteractiveState,
+        ),
+        (Changed<Interaction>, With<Button>),
+    >,
+) {
+    for (interaction, mut color, mut border_color, button_style, state) in &mut interaction_query {
+        if *state != InteractiveState::Disabled && *state != InteractiveState::Selected {
+            if let Some(button_style) = button_style {
+                match *interaction {
+                    Interaction::Hovered => {
+                        let colors: ButtonColor = ButtonColor::new(*button_style, InteractiveState::Hover);
+                        *color = colors.background.into();
+                        border_color.0 = colors.outline;
+                    }
+                    Interaction::Pressed => {
+                        let colors: ButtonColor = ButtonColor::new(*button_style, InteractiveState::Selected);
+                        *color = colors.background.into();
+                        border_color.0 = colors.outline;
+                    }
+                    Interaction::None => {
+                        let colors: ButtonColor = ButtonColor::new(*button_style, InteractiveState::Default);
+                        *color = colors.background.into();
+                        border_color.0 = colors.outline;
+                    }
+                }
+            }
+        }
+    }
 }

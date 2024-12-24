@@ -27,6 +27,7 @@ use crate::primitives::{
         ButtonComponent,
     },
 };
+
 use crate::primitives::button::CustomButton;
 use crate::ButtonStyle;
 use crate::ButtonColor;
@@ -43,6 +44,7 @@ use crate::components::{
 pub struct OnAddressScreen;
 
 pub fn address_setup(
+    mut menu_state: ResMut<NextState<PageState>>,
     mut commands: Commands, 
     asset_server: Res<AssetServer>, 
     fonts: Res<FontResources>,
@@ -58,7 +60,7 @@ pub fn address_setup(
         OnAddressScreen,
     ))
     .with_children(|parent| {
-        sidebar_navigator(parent, &fonts, &asset_server);
+        sidebar_navigator(parent, &fonts, &asset_server, menu_state);
 
         parent.spawn(interface.page_node).with_children(|parent| {
             header.stack_header(parent, &fonts, &asset_server, &colors, Some(Icon::Left), "Bitcoin address", Nav::Home);

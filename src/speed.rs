@@ -33,7 +33,7 @@ use crate::components::radio::radio_button;
 use crate::components::{
     navigator::sidebar_navigator,
 };
-
+use crate::PageState;
 
 #[derive(Component)]
 pub struct OnSpeedScreen;
@@ -49,6 +49,7 @@ pub fn speed_setup(
     asset_server: Res<AssetServer>, 
     fonts: Res<FontResources>,
     colors: Res<Display>,
+    mut menu_state: ResMut<NextState<PageState>>,
 ) {
 
     let bumper = Bumper::new();
@@ -59,7 +60,7 @@ pub fn speed_setup(
         interface.node,
         OnSpeedScreen,
     )).with_children(|parent| {
-        sidebar_navigator(parent, &fonts, &asset_server);
+        sidebar_navigator(parent, &fonts, &asset_server, menu_state);
 
         parent.spawn(interface.page_node).with_children(|parent| {
             header.stack_header(parent, &fonts, &asset_server, &colors, Some(Icon::Left), "Transaction speed", Nav::Amount);

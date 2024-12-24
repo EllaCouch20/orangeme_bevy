@@ -34,12 +34,16 @@ use crate::primitives::{
     },
 };
 
+use crate::PageState;
+
 use crate::components::{
     text_input::text_input,
     navigator::sidebar_navigator,
     tip_button::tip_buttons,
     amount_display::{amount_display, AmountDisplayUsd, AmountDisplayZeros, AmountDisplayHelper},
 };
+
+use crate::components::amount_display::AmountError;
 
 #[derive(Component)]
 pub struct OnAmountScreen;
@@ -50,6 +54,7 @@ pub fn amount_setup(
     fonts: Res<FontResources>,
     state_data: Res<StateData>,
     colors: Res<Display>,
+    mut menu_state: ResMut<NextState<PageState>>,
 ) {
     let bumper = Bumper::new();
     let interface = Interface::new();
@@ -60,13 +65,13 @@ pub fn amount_setup(
         OnAmountScreen,
     ))
     .with_children(|parent| {
-        sidebar_navigator(parent, &fonts, &asset_server);
+        sidebar_navigator(parent, &fonts, &asset_server, menu_state);
 
         parent.spawn(interface.page_node).with_children(|parent| {
             header.stack_header(parent, &fonts, &asset_server, &colors, Some(Icon::Left), "Send bitcoin", Nav::Address);
 
             parent.spawn(interface.content).with_children(|parent| {
-                amount_display(parent, &fonts, &colors, None, &state_data.zeros, &format!("${}", &state_data.usd));
+                amount_display(parent, &fonts, &asset_server, &colors, None, &state_data.zeros, &format!("${}", &state_data.usd));
             });
             bumper.button_bumper(parent, &fonts, &asset_server, vec![
                 (primary_disabled("Continue"), Nav::Speed)
@@ -106,10 +111,8 @@ pub fn amount_button_status(
                 }
             }) {
                 *state = if is_zero {
-                    println!("Disabled");
                     InteractiveState::Disabled
                 } else {
-                    println!("Default");
                     InteractiveState::Default
                 };
 
@@ -136,8 +139,12 @@ pub fn amount_display_system(
         Query<&mut Text, With<AmountDisplayZeros>>,
         Query<(&mut Text, &mut TextColor), With<AmountDisplayHelper>>,
     )>,
+    mut visibile_set: Query<&mut Visibility, With<AmountError>>,
 ) {
     let colors = Display::new();
+    let mut is_error = false;
+    let min = 0.31;
+    let max = 25.31;
     
     if state_data.is_changed() {
         for mut usd in query_set.p0().iter_mut() {
@@ -151,13 +158,29 @@ pub fn amount_display_system(
         for (mut text, mut text_color) in query_set.p2().iter_mut() {
             let usd_value: f32 = state_data.usd.parse().unwrap_or(0.0);
 
-            text.0 = if usd_value < state_data.balance_usd {
-                usd_to_btc(usd_value)
+            (text.0, is_error) = if usd_value > max {
+                for mut visibility in visibile_set.iter_mut() {
+                    *visibility = Visibility::Visible;
+                }
+                (format!("${} maximum.", max), true)
+            } else if usd_value < min && usd_value != 0.0{
+                for mut visibility in visibile_set.iter_mut() {
+                    *visibility = Visibility::Visible;
+                }
+                (format!("${} minimum.", min), true)
+            } else if usd_value == 0.0 {
+                for mut visibility in visibile_set.iter_mut() {
+                    *visibility = Visibility::Hidden;
+                }
+                ("Type dollar amount.".to_string(), false)
             } else {
-                "Amount exceeds balance".to_string()
+                for mut visibility in visibile_set.iter_mut() {
+                    *visibility = Visibility::Hidden;
+                }
+                (usd_to_btc(usd_value), false)
             };
 
-            text_color.0 = if usd_value < state_data.balance_usd {
+            text_color.0 = if !is_error {
                 colors.text_secondary
             } else {
                 colors.status_danger

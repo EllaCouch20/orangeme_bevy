@@ -9,57 +9,21 @@ use crate::theme::fonts::FontResources;
 use crate::theme::color::Display;
 use crate::utils::{EXPAND, cal_font_size, usd_to_btc};
 use crate::StateData;
+use crate::OnAmountScreen;
 
 use crate::components::amount_display::{AmountDisplayUsd, AmountDisplayZeros, AmountDisplayHelper};
-
-// ===== System Updating Display ===== //
-
-pub fn amount_display_system(
-    state_data: Res<StateData>,
-    fonts: Res<FontResources>,
-    mut query_set: ParamSet<(
-        Query<(&mut Text, &mut TextFont), With<AmountDisplayUsd>>,
-        Query<(&mut Text, &mut TextFont), With<AmountDisplayZeros>>,
-        Query<(&mut Text, &mut TextColor), With<AmountDisplayHelper>>,
-    )>,
-) {
-    let colors = Display::new();
-    
-    if state_data.is_changed() {
-        for (mut usd, mut text_font) in query_set.p0().iter_mut() {
-            usd.0 = format!("${}", state_data.usd);
-            text_font.font_size = cal_font_size(&fonts, &state_data.usd);
-        }
-
-        for (mut zeros, mut text_font) in query_set.p1().iter_mut() {
-            zeros.0 = state_data.zeros.clone();
-            text_font.font_size = cal_font_size(&fonts, &state_data.usd);
-        }
-
-        for (mut text, mut text_color) in query_set.p2().iter_mut() {
-            let usd_value: f32 = state_data.usd.parse().unwrap_or(0.0);
-
-            text.0 = if usd_value < state_data.balance_usd {
-                usd_to_btc(usd_value)
-            } else {
-                "Amount exceeds balance".to_string()
-            };
-
-            text_color.0 = if usd_value < state_data.balance_usd {
-                colors.text_secondary
-            } else {
-                colors.status_danger
-            };
-        }
-    }
-}
 
 // ===== Keyboard Input System ===== //
 
 pub fn keyboard_input_system(
     mut keyboard_input_events: EventReader<KeyboardInput>,
     mut state_data: ResMut<StateData>,
+    amount_screen_query: Query<(), With<OnAmountScreen>>,
 ) {
+    if amount_screen_query.is_empty() {
+        return;
+    }
+
     for event in keyboard_input_events.read() {
         if event.state == ButtonState::Pressed {
             let (updated_amount, valid_input, needed_placeholders) = 
