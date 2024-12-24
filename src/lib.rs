@@ -56,7 +56,7 @@ use crate::primitives::button::{
 use crate::components::radio::toggle_radio_buttons;
 
 use crate::home::{OnHomeScreen, home_setup};
-use crate::address::{OnAddressScreen, address_setup, button_status_system};
+use crate::address::{OnAddressScreen, address_setup, button_status_system, address_tip_system};
 use crate::amount::{OnAmountScreen, amount_setup, amount_button_status, amount_display_system};
 use crate::speed::{OnSpeedScreen, speed_setup};
 use crate::confirm::{OnConfirmScreen, confirm_setup};
@@ -170,6 +170,7 @@ fn menu_plugin(app: &mut App) {
         .add_systems(Update, button_status_system)
         .add_systems(Update, button_system)
         .add_systems(Update, toggle_radio_buttons)
+        .add_systems(Update, address_tip_system)
         .add_systems(Update, navigation_system)
         .add_systems(Update, menu_action.run_if(in_state(GameState::Menu)));
 }

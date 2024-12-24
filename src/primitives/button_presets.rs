@@ -16,9 +16,9 @@ use crate::theme::icons::Icon;
 
 use crate::Nav;
 
-// ===== Commonplace Button Usecases ===== //
+// ===== Commonplace Button ===== //
 
-pub fn nav_button_pfp (mut label: &str) -> CustomButton {
+pub fn nav_button_pfp(mut label: &str, preset: bool) -> CustomButton {
     label = if label.len() > 10 {
         if let Some(pos) = label.find(' ') {
             &label[..pos]
@@ -36,13 +36,12 @@ pub fn nav_button_pfp (mut label: &str) -> CustomButton {
         ButtonStyle::Ghost,
         ButtonWidth::Expand,
         ButtonSize::Large,
-        InteractiveState::Default,
+        if preset {InteractiveState::Selected} else {InteractiveState::Default},
         JustifyContent::Start,
     )
 }
 
-
-pub fn nav_button (label: &str, icon: Icon) -> CustomButton {
+pub fn nav_button(label: &str, icon: Icon, preset: bool) -> CustomButton {
     CustomButton::new(
         label,
         Some(icon),
@@ -50,7 +49,7 @@ pub fn nav_button (label: &str, icon: Icon) -> CustomButton {
         ButtonStyle::Ghost,
         ButtonWidth::Expand,
         ButtonSize::Large,
-        InteractiveState::Default,
+        if preset {InteractiveState::Selected} else {InteractiveState::Default},
         JustifyContent::Start,
     )
 }
@@ -106,3 +105,4 @@ pub fn secondary_default(label: &str, icon: Icon) -> CustomButton {
         JustifyContent::Center,
     )
 }
+

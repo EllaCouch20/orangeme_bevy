@@ -60,7 +60,7 @@ pub fn speed_setup(
         interface.node,
         OnSpeedScreen,
     )).with_children(|parent| {
-        sidebar_navigator(parent, &fonts, &asset_server, menu_state);
+        sidebar_navigator(parent, &fonts, &asset_server, 0);
 
         parent.spawn(interface.page_node).with_children(|parent| {
             header.stack_header(parent, &fonts, &asset_server, &colors, Some(Icon::Left), "Transaction speed", Nav::Amount);

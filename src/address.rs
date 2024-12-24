@@ -60,7 +60,7 @@ pub fn address_setup(
         OnAddressScreen,
     ))
     .with_children(|parent| {
-        sidebar_navigator(parent, &fonts, &asset_server, menu_state);
+        sidebar_navigator(parent, &fonts, &asset_server, 0);
 
         parent.spawn(interface.page_node).with_children(|parent| {
             header.stack_header(parent, &fonts, &asset_server, &colors, Some(Icon::Left), "Bitcoin address", Nav::Home);
@@ -82,6 +82,35 @@ pub fn address_setup(
 }
 
 // ===== Button Color Handler ===== //
+
+
+pub fn address_tip_system(
+    mut interaction_query: Query<
+        (
+            Entity,
+            &Interaction,
+            &Parent,
+            &mut BackgroundColor,
+            &mut BorderColor,
+            Option<&ButtonStyle>,
+            &mut InteractiveState,
+        ),
+        (With<Button>, Changed<Interaction>),
+    >,
+    tip_query: Query<&Tip>,
+    address_screen_query: Query<(), With<OnAddressScreen>>
+) {
+    if address_screen_query.is_empty() {return};
+
+    for (entity, interaction, parent, mut color, mut border_color, button_style, mut state) in &mut interaction_query {
+        if *interaction == Interaction::Pressed {
+            println!("Interaction Query Entity: {:?}", entity);
+            if let Ok(tip) = tip_query.get(parent.get()) {
+                println!("TIP: {:?}", tip);
+            }
+        }
+    }
+}
 
 pub fn button_status_system(
     mut param_set: ParamSet<(

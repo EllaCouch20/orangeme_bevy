@@ -5,7 +5,7 @@ use crate::primitives::button::{CustomButton, ButtonComponent};
 
 // ===== List of Helper Buttons ===== //
 
-#[derive(Component)]
+#[derive(Component, Debug)]
 pub enum Tip {
     PasteClipboard, 
     ScanQRCode, 
