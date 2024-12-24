@@ -27,10 +27,12 @@ use crate::primitives::{
         ButtonComponent,
     },
 };
-
-use crate::primitives::button_presets::{primary_default, secondary_default};
+use crate::primitives::button::CustomButton;
+use crate::ButtonStyle;
+use crate::ButtonColor;
+use crate::PageState;
+use crate::primitives::button_presets::{primary_disabled, secondary_default};
 use crate::components::tip_button::Tip;
-
 use crate::components::{
     text_input::text_input,
     navigator::sidebar_navigator,
@@ -46,6 +48,7 @@ pub fn address_setup(
     fonts: Res<FontResources>,
     colors: Res<Display>,
 ) {
+
     let bumper = Bumper::new();
     let interface = Interface::new();
     let header = Header::new();
@@ -70,8 +73,63 @@ pub fn address_setup(
             });
 
             bumper.button_bumper(parent, &fonts, &asset_server, vec![
-                (primary_default("Continue"), Nav::Amount)
+                (primary_disabled("Continue"), Nav::Amount)
             ]);
         });
     });
+}
+
+// ===== Button Color Handler ===== //
+
+pub fn button_status_system(
+    mut param_set: ParamSet<(
+        Query<(
+            Entity,
+            &TextInputValue,
+        ), Changed<TextInputValue>>,
+    )>,
+    mut p_set: ParamSet<(
+        Query<(
+            &mut CustomButton, 
+            Option<&ButtonStyle>,
+            &mut BackgroundColor,
+            &mut BorderColor,
+            &mut InteractiveState,
+            &Children,
+        ), With<Button>>,
+    )>,
+    mut text_query: Query<(&mut TextColor, &mut Text, &Parent), With<Text>>,
+    address_screen_query: Query<(), With<OnAddressScreen>>
+) {
+    if address_screen_query.is_empty() {return};
+    
+    for (_, input_value) in param_set.p0().iter() {
+        
+        let mut button_query = p_set.p0();
+        for (mut data, button_style, mut color, mut border_color, mut state, children) in button_query.iter_mut() {
+            for &child in children.iter() {
+                if let Ok(text) = text_query.get(child) {
+                    if text.1.0 == "Continue" {
+
+                        *state = if input_value.0.is_empty() {
+                            InteractiveState::Disabled
+                        } else {
+                            InteractiveState::Default
+                        };
+            
+                        if let Some(button_style) = button_style {
+                            let button_colors: ButtonColor = ButtonColor::new(*button_style, *state);
+                            *color = button_colors.background.into();
+                            *border_color = button_colors.outline.into();
+                            for child in children.iter() {
+                                if let Ok((mut text_color, _, _)) = text_query.get_mut(*child) {
+                                    *text_color = button_colors.label.into();
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
 }

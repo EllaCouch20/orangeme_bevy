@@ -62,7 +62,7 @@ pub fn home_setup(
             });
 
             bumper.button_bumper(parent, &fonts, &asset_server, vec![
-                (primary_default("Receive"), Nav::Address), 
+                (primary_default("Receive"), Nav::Receive), 
                 (primary_default("Send"), Nav::Address)
             ]);
         });

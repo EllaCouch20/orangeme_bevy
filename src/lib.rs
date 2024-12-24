@@ -7,6 +7,7 @@ mod utils;
 mod speed;
 mod confirm;
 mod success;
+mod receive;
 
 pub mod primitives { 
     pub mod button; 
@@ -48,7 +49,6 @@ use theme::{
 use crate::theme::color::{Display, ButtonColor};
 use bevy_simple_text_input::{TextInputPlugin, TextInputSystem};
 use crate::primitives::button::{
-    button_status_system, 
     InteractiveState,
     ButtonStyle,
 };
@@ -56,11 +56,12 @@ use crate::primitives::button::{
 use crate::components::radio::toggle_radio_buttons;
 
 use crate::home::{OnHomeScreen, home_setup};
-use crate::address::{OnAddressScreen, address_setup};
-use crate::amount::{OnAmountScreen, amount_setup};
+use crate::address::{OnAddressScreen, address_setup, button_status_system};
+use crate::amount::{OnAmountScreen, amount_setup, amount_button_status};
 use crate::speed::{OnSpeedScreen, speed_setup};
 use crate::confirm::{OnConfirmScreen, confirm_setup};
 use crate::success::{OnSuccessScreen, success_setup};
+use crate::receive::{OnReceiveScreen, receive_setup};
 use crate::components::input::{keyboard_input_system, amount_display_system};
 use crate::components::text_input::text_input_visuals_system;
 
@@ -107,6 +108,8 @@ pub enum Nav {
     Confirm,
     Speed,
     Success,
+    Receive,
+    None,
 }
 
 #[derive(Clone, Copy, Default, Eq, PartialEq, Debug, Hash, States)]
@@ -117,6 +120,7 @@ pub enum PageState {
     Confirm,
     Speed,
     Success,
+    Receive,
     #[default]
     Disabled,
 }
@@ -156,7 +160,10 @@ fn menu_plugin(app: &mut App) {
         .add_systems(OnExit(PageState::Confirm), despawn_screen::<OnConfirmScreen>)
         .add_systems(OnEnter(PageState::Success), success_setup)
         .add_systems(OnExit(PageState::Success), despawn_screen::<OnSuccessScreen>)
+        .add_systems(OnEnter(PageState::Receive), receive_setup)
+        .add_systems(OnExit(PageState::Receive), despawn_screen::<OnReceiveScreen>)
         .add_systems(PreStartup, setup_fonts)
+        .add_systems(Update, amount_button_status)
         .add_systems(Update, keyboard_input_system)
         .add_systems(Update, amount_display_system)
         .add_systems(Update, button_status_system)
@@ -201,6 +208,10 @@ fn menu_action(
                     Nav::Success => {
                         menu_state.set(PageState::Success);
                     }
+                    Nav::Receive => {
+                        menu_state.set(PageState::Receive);
+                    }
+                    Nav::None => {}
                 }
             }
         }

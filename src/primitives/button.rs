@@ -83,6 +83,8 @@ impl CustomButton {
     }
 }
 
+
+
 pub struct ButtonComponent;
 
 impl ButtonComponent {
@@ -168,58 +170,5 @@ impl ButtonComponent {
         button.insert(data.style);
         button.insert(data.state);
         button.insert(data);
-    }
-}
-
-// ===== Button Color Handler ===== //
-
-pub fn button_status_system(
-    mut param_set: ParamSet<(
-        Query<(
-            Entity, 
-            &mut TextInputInactive, 
-            &mut BorderColor,
-            &TextInputValue,
-        ), Changed<TextInputValue>>,
-        Query<(
-            &mut CustomButton, 
-            &SetState,
-            Option<&ButtonStyle>,
-            &mut BackgroundColor,
-            &mut BorderColor,
-            &Children,
-        ), With<Button>>,
-    )>,
-    mut text_query: Query<(&mut TextColor, &Parent), With<Text>>,
-) {
-    let is_any_input_empty = {
-        let text_input_query = param_set.p0();
-        text_input_query.iter().any(|(_, _, _, input_value)| input_value.0.is_empty())
-    };
-
-    let mut button_query = param_set.p1();
-    for (mut data, set_state, button_style, mut color, mut border_color, children) in button_query.iter_mut() {
-        if *set_state == SetState::Disablable {
-            let new_state = if is_any_input_empty {
-                InteractiveState::Disabled
-            } else {
-                InteractiveState::Default
-            };
-
-            if data.state != new_state {
-                data.state = new_state;
-
-                if let Some(button_style) = button_style {
-                    let button_colors: ButtonColor = ButtonColor::new(*button_style, data.state);
-                    *color = button_colors.background.into();
-                    *border_color = button_colors.outline.into();
-                    for child in children.iter() {
-                        if let Ok((mut text_color, _parent)) = text_query.get_mut(*child) {
-                            *text_color = button_colors.label.into();
-                        }
-                    }
-                }
-            }
-        }
     }
 }

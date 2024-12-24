@@ -17,9 +17,6 @@ use bevy_simple_text_input::{
     TextInputTextFont,
 };
 
-
-// ===== Instanitate Widget ===== //
-
 pub fn text_input(
     parent: &mut ChildBuilder,
     fonts: &Res<FontResources>,

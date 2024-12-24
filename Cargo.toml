@@ -11,6 +11,8 @@ bevy_ui = "0.15.0"
 rand = "0.8.5"
 bevy = "0.15.0"
 bevy_simple_text_input = "0.10.0"
+qrcode = "0.14.1"
+image = "0.25.5"
 
 [lib]
 crate-type = [

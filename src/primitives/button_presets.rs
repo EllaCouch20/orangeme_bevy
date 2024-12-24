@@ -68,6 +68,19 @@ pub fn primary_default(label: &str) -> CustomButton {
     )
 }
 
+pub fn primary_disabled(label: &str) -> CustomButton {
+    CustomButton::new(
+        label,
+        None,
+        None,
+        ButtonStyle::Primary,
+        ButtonWidth::Expand,
+        ButtonSize::Large,
+        InteractiveState::Disabled,
+        JustifyContent::Center,
+    )
+}
+
 pub fn secondary_wide(label: &str) -> CustomButton {
     CustomButton::new(
         label,
