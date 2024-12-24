@@ -92,8 +92,10 @@ pub fn amount_button_status(
         &mut InteractiveState, 
         &Children,
     ), With<Button>>,
-    mut text_query: Query<(&mut TextColor, &mut Text), Without<AmountDisplayUsd>>,
+    mut text_query: Query<(&mut TextColor, &mut Text), (Without<AmountDisplayUsd>, Without<AmountDisplayHelper>)>,
+    mut helper_query: Query<&mut TextColor, With<AmountDisplayHelper>>,
     amount_screen_query: Query<(), With<OnAmountScreen>>,
+    colors: Res<Display>,
 ) {
     if amount_screen_query.is_empty() {
         return;
@@ -101,7 +103,6 @@ pub fn amount_button_status(
 
     for usd in usd_query.iter() {
         let is_zero = usd.0 == "$0" ||  usd.0 == "$0." || usd.0 == "$0.0" || usd.0 == "$0.00";
-
         for (mut button, button_style, mut color, mut border_color, mut state, children) in button_query.iter_mut() {
             if children.iter().any(|&child| {
                 if let Ok(text) = text_query.get(child) {
@@ -110,11 +111,13 @@ pub fn amount_button_status(
                     false
                 }
             }) {
-                *state = if is_zero {
-                    InteractiveState::Disabled
-                } else {
-                    InteractiveState::Default
-                };
+                for mut text_color in helper_query.iter_mut() {
+                    *state = if text_color.0 == colors.status_danger || is_zero {
+                        InteractiveState::Disabled
+                    } else {
+                        InteractiveState::Default
+                    };
+                }
 
                 if let Some(button_style) = button_style {
                     let button_colors = ButtonColor::new(*button_style, *state);
@@ -131,6 +134,7 @@ pub fn amount_button_status(
         }
     }
 }
+
 
 pub fn amount_display_system(
     state_data: Res<StateData>,
@@ -163,7 +167,7 @@ pub fn amount_display_system(
                     *visibility = Visibility::Visible;
                 }
                 (format!("${} maximum.", max), true)
-            } else if usd_value < min && usd_value != 0.0{
+            } else if usd_value < min && usd_value != 0.0 {
                 for mut visibility in visibile_set.iter_mut() {
                     *visibility = Visibility::Visible;
                 }
