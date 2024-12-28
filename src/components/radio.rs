@@ -1,18 +1,8 @@
 use bevy::prelude::*;
-use bevy::input::keyboard::{Key, KeyboardInput};
-use bevy::input::ButtonState;
-use bevy_ui::prelude::*;
 
-use std::fmt::Write;
-
-use crate::theme::fonts::FontResources;
-use crate::theme::color::Display;
+use crate::Theme;
 use crate::utils::{EXPAND, text};
-use crate::theme::icons::Icon;
-use crate::StateData;
-use crate::speed::RadioButtonState;
-
-use crate::components::amount_display::{AmountDisplayUsd, AmountDisplayZeros, AmountDisplayHelper};
+use crate::bitcoin::speed::RadioButtonState;
 
 // ===== System Updating Display ===== //
 
@@ -20,19 +10,16 @@ use crate::components::amount_display::{AmountDisplayUsd, AmountDisplayZeros, Am
 pub struct RadioButton;
 pub fn radio_button(
     parent: &mut ChildBuilder,
-    fonts: &Res<FontResources>,
-    colors: &Res<Display>,
-    asset_server: &Res<AssetServer>,
+    theme: &Res<Theme>,
     title: &str,
     subtitle: &str,
-    index: u8,
     selected: bool,
 ) {
-    let title_font = fonts.style.heading.clone();
-    let title_size = fonts.size.h5;
+    let title_font = theme.fonts.style.heading.clone();
+    let title_size = theme.fonts.size.h5;
 
-    let sub_font = fonts.style.text.clone();
-    let sub_size = fonts.size.xs;
+    let sub_font = theme.fonts.style.text.clone();
+    let sub_size = theme.fonts.size.xs;
 
     parent.spawn((
         Node {
@@ -56,9 +43,9 @@ pub fn radio_button(
         parent.spawn((
 
             if selected {
-                Icon::new(Icon::RadioFilled, asset_server)
+                theme.icons.radio_filled()
             } else {
-                Icon::new(Icon::Radio, asset_server)
+                theme.icons.radio()
             },
 
             Node {
@@ -78,31 +65,29 @@ pub fn radio_button(
             ..default()
         })
         .with_children(|parent| {
-            parent.spawn(text(title, title_font, title_size, colors.text_heading));
-            parent.spawn(text(subtitle, sub_font, sub_size, colors.text_secondary));
+            parent.spawn(text(title, title_font, title_size, theme.colors.text_heading));
+            parent.spawn(text(subtitle, sub_font, sub_size, theme.colors.text_secondary));
         });
     });
 }
 
 pub fn toggle_radio_buttons(
-    mut commands: Commands,
-    asset_server: Res<AssetServer>,
+    theme: Res<Theme>,
     mut interaction_query: Query<(
-        Entity,
         &Interaction,
         &mut RadioButtonState,
     ), (Changed<Interaction>, With<Button>)>,
     mut image_query: Query<(&mut ImageNode, &Parent)>,
     parent_query: Query<&RadioButton>,
 ) {
-    for (entity, interaction, mut state) in &mut interaction_query {
+    for (interaction, mut state) in &mut interaction_query {
         if *interaction == Interaction::Pressed {
             for (mut image_node, parent) in &mut image_query {
-                if let Ok(radio_button_state) = parent_query.get(parent.get()) {
+                if let Ok(_radio_button_state) = parent_query.get(parent.get()) {
                     state.selected = !state.selected;
-                    *image_node = Icon::new(Icon::RadioFilled, &asset_server);
+                    *image_node = theme.icons.radio_filled();
                     if state.selected {
-                        *image_node = Icon::new(Icon::Radio, &asset_server);
+                        *image_node = theme.icons.radio();
                     }
                 }
             }

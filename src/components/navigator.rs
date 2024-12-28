@@ -1,23 +1,14 @@
 use bevy::prelude::*;
 
-use crate::{
-    theme::{
-        fonts::FontResources,
-        color::Display,
-        icons::Icon,
-    },
-    primitives::{
-        button_presets::{nav_button, nav_button_pfp},
-        button::ButtonComponent,
-    },
-    utils::{EXPAND, spacer},
-    Nav,
-    InteractiveState,
-};
+use crate::components::button_presets::{nav_button, nav_button_pfp};
 
-use crate::ButtonColor;
+use crate::utils::{EXPAND, spacer};
+
 use crate::ButtonStyle;
-use crate::PageState;
+use crate::theme::color::ButtonColor;
+use crate::InteractiveState;
+use crate::Page;
+use crate::Theme;
 
 // ===== Desktop Sidebar Navigation ===== //
 
@@ -31,14 +22,9 @@ pub enum SidebarButton {
 
 pub fn sidebar_navigator (
     parent: &mut ChildBuilder,
-    fonts: &Res<FontResources>,
-    asset_server: &Res<AssetServer>, 
+    theme: &Res<Theme>,
     preset: u8,
 ) {
-
-    let font = fonts.style.label.clone();
-    let font_size = fonts.size.title;
-    let colors = Display::new();
 
     parent.spawn(Node {
         width: Val::Px(300.0),
@@ -47,13 +33,6 @@ pub fn sidebar_navigator (
         justify_content: JustifyContent::Start,
         ..default()
     }).with_children(|parent| {
-
-        // ===== Instanitate Buttons ===== //
-
-        let wallet = nav_button("Bitcoin", Icon::Wallet, preset == 0);
-        let message = nav_button("Message", Icon::Message, preset == 1);
-        let profile = nav_button_pfp("Ella Couch", preset == 2);
-
         parent.spawn((
             Node {
                 width: EXPAND,
@@ -72,13 +51,13 @@ pub fn sidebar_navigator (
                 },
                 ..default()
             },
-            BorderColor(colors.outline_secondary),
+            BorderColor(theme.colors.outline_secondary),
         )).with_children(|child| {
 
             // ===== orange Logo ===== //
 
             child.spawn((
-                ImageNode::new(asset_server.load("wordmark.png")),
+                theme.icons.wordmark(),
                 Node { 
                     width: Val::Px(90.0), 
                     ..default() 
@@ -94,93 +73,43 @@ pub fn sidebar_navigator (
                 flex_direction: FlexDirection::Column,
                 row_gap: Val::Px(8.0), 
                 ..default()
-            }).with_children(|child| {
-                child.spawn((Node {
-                    width: EXPAND,
-                    justify_content: JustifyContent::Center,
-                    align_items: AlignItems::Center,
-                    ..default()
-                }, SidebarButton::Bitcoin)).with_children(|child| {
-                    ButtonComponent::spawn_button(child, asset_server, fonts, wallet);
-                });
-                child.spawn((Node {
-                    width: EXPAND,
-                    justify_content: JustifyContent::Center,
-                    align_items: AlignItems::Center,
-                    ..default()
-                }, SidebarButton::Messages)).with_children(|child| {
-                    ButtonComponent::spawn_button(child, asset_server, fonts, message);
-                });
+            }).with_children(|parent| {
+                nav_button("Bitcoin", theme.icons.wallet(), preset == 0).create_on(parent, SidebarButton::Bitcoin, &theme);
+                nav_button("Messages", theme.icons.message(), preset == 1).create_on(parent, SidebarButton::Messages, &theme);
             });
 
             spacer(child);
 
             // ===== Profile Button ===== //
             
-            child.spawn((Node {
-                width: EXPAND,
-                justify_content: JustifyContent::Center,
-                align_items: AlignItems::Center,
-                ..default()
-            }, SidebarButton::Profile)).with_children(|child| {
-                ButtonComponent::spawn_button(child, asset_server, fonts, profile);
-            });
+            nav_button_pfp("Ella Couch", preset == 2).create_on(child, SidebarButton::Profile, &theme);
         });
     });
 }
 
-pub fn navigation_system(
-    mut interaction_query: Query<
-        (
-            &Interaction,
-            &Parent,
-            &mut BackgroundColor,
-            &mut BorderColor,
-            Option<&ButtonStyle>,
-            &mut InteractiveState,
-        ),
-        (With<Button>),
-    >,
-    query: Query<&SidebarButton>,
-    mut menu_state: ResMut<NextState<PageState>>,
+pub fn sidebar_navigation_system(
+    mut interaction_query: Query<(
+        &Parent,
+        &mut BackgroundColor,
+        &mut BorderColor,
+        Option<&ButtonStyle>,
+        &mut InteractiveState,
+    ), With<Button>>,
+    sidebar_query: Query<&SidebarButton>,
+    mut menu_state: ResMut<NextState<Page>>,
 ) {
     let mut selected_button = None;
 
-    for (interaction, parent, mut color, mut border_color, button_style, mut state) in &mut interaction_query {
-        if *interaction == Interaction::Pressed {
-            selected_button = Some(parent.get());
-
-            if let Ok(nav) = query.get(parent.get()) {
-                match nav {
-                    SidebarButton::Bitcoin => menu_state.set(PageState::Home),
-                    SidebarButton::Messages => menu_state.set(PageState::Home),
-                    SidebarButton::Profile => menu_state.set(PageState::Home),
-                }
-            }
-
-            if let Some(button_style) = button_style {
-                let colors: ButtonColor = ButtonColor::new(*button_style, InteractiveState::Selected);
-                *color = colors.background.into();
-                border_color.0 = colors.outline;
-            }
-
-            *state = InteractiveState::Selected;
-        }
-    }
-
     if let Some(selected_parent) = selected_button {
-        for (interaction, parent, mut color, mut border_color, button_style, mut state) in &mut interaction_query {
-            if parent.get() != selected_parent {
-                if query.get(parent.get()).is_ok() {
-                    
-                    if let Some(button_style) = button_style {
-                        let colors: ButtonColor = ButtonColor::new(*button_style, InteractiveState::Default);
-                        *color = colors.background.into();
-                        border_color.0 = colors.outline;
-                    }
-
-                    *state = InteractiveState::Default;
+        for (parent, mut color, mut border_color, button_style, mut state) in &mut interaction_query {
+            if parent.get() != selected_parent && sidebar_query.get(parent.get()).is_ok() {
+                if let Some(button_style) = button_style {
+                    let colors = ButtonColor::new(*button_style, InteractiveState::Default);
+                    *color = colors.background.into();
+                    border_color.0 = colors.outline;
                 }
+
+                *state = InteractiveState::Default;
             }
         }
     }

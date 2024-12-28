@@ -1,14 +1,6 @@
 use bevy::prelude::*;
-use bevy::input::keyboard::{Key, KeyboardInput};
-use bevy::input::ButtonState;
-use bevy_ui::prelude::*;
-
-use std::fmt::Write;
-use crate::theme::icons::Icon;
-use crate::theme::fonts::FontResources;
-use crate::theme::color::Display;
 use crate::utils::{EXPAND, cal_font_size, usd_to_btc, text};
-use crate::StateData;
+use crate::Theme;
 
 #[derive(Component)]
 pub struct AmountDisplayUsd;
@@ -23,18 +15,16 @@ pub struct AmountError;
 
 pub fn amount_display(
     parent: &mut ChildBuilder,
-    fonts: &Res<FontResources>,
-    asset_server: &Res<AssetServer>,
-    colors: &Res<Display>,
+    theme: &Res<Theme>,
     error: Option<&str>,
     zeros: &str,
     usd: &str,
 ){
-    let usd_font = fonts.style.label.clone();
-    let usd_font_size = cal_font_size(fonts, usd);
+    let usd_font = theme.fonts.style.label.clone();
+    let usd_font_size = cal_font_size(theme, usd);
 
-    let btc_font = fonts.style.text.clone();
-    let btc_font_size = fonts.size.lg;
+    let btc_font = theme.fonts.style.text.clone();
+    let btc_font_size = theme.fonts.size.lg;
 
     let txt = if let Some(error) = error {
         error
@@ -60,11 +50,11 @@ pub fn amount_display(
         })
         .with_children(|child| { 
             child.spawn((
-                text(usd, usd_font.clone(), usd_font_size, colors.text_heading),
+                text(usd, usd_font.clone(), usd_font_size, theme.colors.text_heading),
                 AmountDisplayUsd
             ));
             child.spawn((
-                text(zeros, usd_font, usd_font_size, colors.text_secondary),
+                text(zeros, usd_font, usd_font_size, theme.colors.text_secondary),
                 AmountDisplayZeros
             ));
         }); 
@@ -88,10 +78,10 @@ pub fn amount_display(
                     align_items: AlignItems::Center,
                     ..default()
                 },
-                Icon::new(Icon::Error, asset_server),
+                theme.icons.error(),
             )); 
             parent.spawn((
-                text(txt, btc_font, btc_font_size, colors.text_secondary),
+                text(txt, btc_font, btc_font_size, theme.colors.text_secondary),
                 AmountDisplayHelper
             )); 
         }); 

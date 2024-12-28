@@ -4698,6 +4698,7 @@ checksum = "1261fe7e33c73b354eab43b1273a57c8f967d0391e80353e51f764ac02cf6775"
 name = "orange"
 version = "0.1.0"
 dependencies = [
+ "arboard",
  "bevy 0.15.0",
  "bevy_egui",
  "bevy_simple_text_input",

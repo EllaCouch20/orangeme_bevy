@@ -1,7 +1,5 @@
 use bevy::prelude::*;
-use crate::theme::fonts::FontResources;
-use crate::theme::color::Display;
-use bevy_ui::prelude::*;
+use crate::Theme;
 use crate::utils::{EXPAND, text};
 
 
@@ -9,17 +7,15 @@ use crate::utils::{EXPAND, text};
 
 pub fn balance_display(
     parent: &mut ChildBuilder,
-    fonts: &Res<FontResources>,
+    theme: &Res<Theme>,
     usd: &str,
     btc: &str,
 ){
-    let font = fonts.style.label.clone();
-    let font_size = fonts.size.title;
+    let font = theme.fonts.style.label.clone();
+    let font_size = theme.fonts.size.title;
 
-    let btc_font = fonts.style.text.clone();
-    let btc_font_size = fonts.size.lg;
-
-    let colors = Display::new();
+    let btc_font = theme.fonts.style.text.clone();
+    let btc_font_size = theme.fonts.size.lg;
     
     parent.spawn(Node {
         width: EXPAND,
@@ -32,10 +28,10 @@ pub fn balance_display(
     })
     .with_children(|child| {
         child.spawn(
-            text(usd, font, font_size, colors.text_heading),
+            text(usd, font, font_size, theme.colors.text_heading),
         );
         child.spawn(
-            text(btc, btc_font, btc_font_size, colors.text_secondary),
+            text(btc, btc_font, btc_font_size, theme.colors.text_secondary),
         ); 
     });  
 }

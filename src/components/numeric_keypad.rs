@@ -1,16 +1,7 @@
 use bevy::prelude::*;
-use bevy::input::keyboard::{Key, KeyboardInput};
-use bevy::input::ButtonState;
-use bevy_ui::prelude::*;
 
-use std::fmt::Write;
-
-use crate::theme::fonts::FontResources;
-use crate::theme::color::Display;
+use crate::Theme;
 use crate::utils::{EXPAND, text};
-use crate::StateData;
-use crate::theme::icons::Icon;
-use crate::components::amount_display::{AmountDisplayUsd, AmountDisplayZeros, AmountDisplayHelper};
 
 // ===== System Updating Display ===== //
 
@@ -19,15 +10,8 @@ pub struct KeypadButton;
 
 pub fn numeric_keypad(
     parent: &mut ChildBuilder,
-    fonts: &Res<FontResources>,
-    asset_server: &Res<AssetServer>,
-    key_str: Option<&str>,
-    key_icon: Option<Icon>,
+    theme: &Res<Theme>,
 ){
-    let font = fonts.style.label.clone();
-    let font_size = fonts.size.lg;
-
-    let colors = Display::new();
 
     let row_node = Node {
         width: EXPAND,
@@ -47,40 +31,37 @@ pub fn numeric_keypad(
         ..default()
     }).with_children(|parent| { 
         parent.spawn(row_node.clone()).with_children(|parent| {
-            keypad_button(parent, &fonts, &asset_server, Some("1"), None);
-            keypad_button(parent, &fonts, &asset_server, Some("2"), None);
-            keypad_button(parent, &fonts, &asset_server, Some("3"), None);
+            keypad_button(parent, &theme, Some("1"), None);
+            keypad_button(parent, &theme, Some("2"), None);
+            keypad_button(parent, &theme, Some("3"), None);
         });
         parent.spawn(row_node.clone()).with_children(|parent| {
-            keypad_button(parent, &fonts, &asset_server, Some("4"), None);
-            keypad_button(parent, &fonts, &asset_server, Some("5"), None);
-            keypad_button(parent, &fonts, &asset_server, Some("6"), None);
+            keypad_button(parent, &theme, Some("4"), None);
+            keypad_button(parent, &theme, Some("5"), None);
+            keypad_button(parent, &theme, Some("6"), None);
         });
         parent.spawn(row_node.clone()).with_children(|parent| {
-            keypad_button(parent, &fonts, &asset_server, Some("7"), None);
-            keypad_button(parent, &fonts, &asset_server, Some("8"), None);
-            keypad_button(parent, &fonts, &asset_server, Some("9"), None);
+            keypad_button(parent, &theme, Some("7"), None);
+            keypad_button(parent, &theme, Some("8"), None);
+            keypad_button(parent, &theme, Some("9"), None);
         });
         parent.spawn(row_node.clone()).with_children(|parent| {
-            keypad_button(parent, &fonts, &asset_server, Some("."), None);
-            keypad_button(parent, &fonts, &asset_server, Some("0"), None);
-            keypad_button(parent, &fonts, &asset_server, None, Some(Icon::Back));
+            keypad_button(parent, &theme, Some("."), None);
+            keypad_button(parent, &theme, Some("0"), None);
+            keypad_button(parent, &theme, None, Some(theme.icons.back()));
         });
     });  
 }
 
 pub fn keypad_button(
     parent: &mut ChildBuilder,
-    fonts: &Res<FontResources>,
-    asset_server: &Res<AssetServer>,
+    theme: &Res<Theme>,
     key_str: Option<&str>,
-    key_icon: Option<Icon>,
+    key_icon: Option<ImageNode>,
 ){
-    let font = fonts.style.label.clone();
-    let font_size = fonts.size.lg;
+    let font = theme.fonts.style.label.clone();
+    let font_size = theme.fonts.size.lg;
 
-    let colors = Display::new();
-    
     parent.spawn((
         Node {
             width: EXPAND,
@@ -98,7 +79,7 @@ pub fn keypad_button(
 
         if let Some(icon) = key_icon {
             parent.spawn((
-                Icon::new(icon, asset_server),
+                icon,
                 Node {
                     height: Val::Px(24.0),
                     width: Val::Px(24.0),
@@ -107,7 +88,7 @@ pub fn keypad_button(
             ));
         } else if let Some(key) = key_str {
             parent.spawn(
-                text(key, font, font_size, colors.text_heading),
+                text(key, font, font_size, theme.colors.text_heading),
             );
         }  
     });  

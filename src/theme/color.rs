@@ -4,13 +4,12 @@ use bevy::prelude::*;
 use std::str::FromStr;
 use bevy_ui::prelude::*;
 
-use crate::primitives::button::{InteractiveState, ButtonStyle};
-
+use crate::components::button::{InteractiveState, ButtonStyle};
 
 /* -------- DISPLAY -------- */
 
-#[derive(Resource)]
-pub struct Display { 
+#[derive(Copy, Clone)]
+pub struct ColorResources { 
     pub bg_primary: Color, 
     pub bg_secondary: Color,
 
@@ -27,15 +26,15 @@ pub struct Display {
     pub status_danger: Color,
 }
 
-impl Display {
-    pub fn new() -> Self {
-        Display {
+impl Default for ColorResources {
+    fn default() -> Self {
+        ColorResources {
             bg_primary: Colors::tapa().shade1000,
             bg_secondary: Colors::tapa().shade950,
             
             outline_primary: Colors::tapa().shade0,
             outline_secondary: Colors::tapa().shade700,
-            outline_tint: Colors::transparent().shade300,
+            outline_tint: Colors::transparent().shade700,
             
             text_heading: Colors::tapa().shade0,
             text_primary: Colors::tapa().shade100,
@@ -47,6 +46,7 @@ impl Display {
         }
     }
 }
+
 
 /* -------- ICONS -------- */
 
@@ -68,7 +68,7 @@ impl IconColor {
                 color: Colors::tapa().shade200,
             },
             InteractiveState::Selected => IconColor {
-                color: Colors::tapa().shade200,
+                color: Colors::tapa().shade0,
             },
         }
     }
@@ -86,9 +86,7 @@ pub struct ButtonColor {
 impl ButtonColor {
     pub fn new(style: ButtonStyle, state: InteractiveState) -> Self {
         match (style, state) {
-
-            // ===== Primary Button Styles ===== //
-
+            // Primary button styles
             (ButtonStyle::Primary, InteractiveState::Default) => ButtonColor {
                 background: Colors::torch_red().shade500,
                 label: Colors::tapa().shade0,
@@ -110,8 +108,7 @@ impl ButtonColor {
                 outline: Colors::transparent().shade0,
             },
 
-            // ===== Secondary Button Styles ===== //
-
+            // Secondary button styles
             (ButtonStyle::Secondary, InteractiveState::Default) => ButtonColor {
                 background: Colors::transparent().shade0,
                 label: Colors::tapa().shade0,
@@ -133,8 +130,7 @@ impl ButtonColor {
                 outline: Colors::tapa().shade700,
             },
 
-            // ===== Ghost Button Styles ===== //
-
+            // Ghost button styles
             (ButtonStyle::Ghost, InteractiveState::Default) => ButtonColor {
                 background: Colors::transparent().shade0,
                 label: Colors::tapa().shade0,
@@ -269,8 +265,6 @@ impl Colors {
     }
 
 }
-
-// ===== Convert Hexcode to SRGB ===== //
 
 pub fn hex(hex: &str) -> Color {
     let hex = hex.trim_start_matches('#');

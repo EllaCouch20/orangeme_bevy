@@ -1,8 +1,12 @@
-mod balance_display;
 mod amount_display;
-mod numeric_keypad;
+mod balance_display;
+mod button_presets;
+mod button;
+mod input;
+mod interfaces;
 mod navigator;
+mod numeric_keypad;
+mod profile_photo;
+mod radio;
 mod text_input;
 mod tip_button;
-mod input;
-mod radio;

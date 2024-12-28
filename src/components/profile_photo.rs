@@ -1,19 +1,16 @@
 use bevy::prelude::*;
 use crate::utils::EXPAND;
-use crate::theme::fonts::FontResources;
-use crate::theme::color::Display;
+use crate::Theme;
 
 // ===== Profile Photo ===== //
 
 pub fn profile_photo(
     parent: &mut ChildBuilder,
-    fonts: &Res<FontResources>,
     asset_server: &Res<AssetServer>,
+    theme: &Res<Theme>,
     size: f32,
     path: &str,
 ){
-    let colors = Display::new();
-
     parent.spawn(Node {
         width: Val::Px(size),
         height: Val::Px(size),
@@ -28,7 +25,7 @@ pub fn profile_photo(
                 height: EXPAND,
                 ..default()
             },
-            BorderColor(colors.outline_primary),
+            BorderColor(theme.colors.outline_primary),
             BorderRadius::MAX,
             ImageNode::new(asset_server.load(path))
         ));
